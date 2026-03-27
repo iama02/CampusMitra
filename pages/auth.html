@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CampusMitra - Authentication</title>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: '#2563eb',
+                        secondary: '#4f46e5',
+                        accent: '#0d9488',
+                        success: '#10b981',
+                        danger: '#ef4444',
+                        background: '#f8fafc',
+                        textdark: '#111827',
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+
+<body class="bg-background text-textdark min-h-screen flex items-center justify-center p-4">
+
+    <div
+        class="flex flex-col md:flex-row w-full max-w-4xl bg-white rounded-2xl shadow-xl overflow-hidden min-h-[600px] border border-gray-100 relative">
+
+        <!-- Left Panel -->
+        <div class="hidden md:flex md:w-5/12 bg-primary flex-col justify-center items-center p-8 text-white relative">
+            <div class="absolute inset-0 bg-secondary opacity-60 bg-gradient-to-br from-primary to-secondary"></div>
+            <!-- Abstract background shape -->
+            <div class="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 rounded-full bg-white opacity-10 blur-2xl"></div>
+            <div class="absolute bottom-0 left-0 -ml-16 -mb-16 w-64 h-64 rounded-full bg-blue-300 opacity-20 blur-2xl">
+            </div>
+
+            <div class="z-10 text-center flex flex-col items-center">
+                <div
+                    class="w-48 h-48 bg-white rounded-xl flex items-center justify-center mb-6 shadow-2xl p-3 relative">
+                    <img src="../assets/images/logo.png" alt="Logo" class="max-w-full max-h-full object-contain"
+                        onerror="this.src='https://ui-avatars.com/api/?name=CM&background=fff&color=2563eb&size=192'">
+                </div>
+                <h2 class="text-3xl font-bold mb-2 tracking-tight">CampusMitra</h2>
+
+                <div class="flex flex-col gap-3 mt-4">
+                    <div class="flex items-center gap-2 bg-white/10 rounded-lg px-4 py-2">
+                        <span>📚</span>
+                        <span class="text-sm text-blue-100">Borrow & Rent items</span>
+                    </div>
+                    <div class="flex items-center gap-2 bg-white/10 rounded-lg px-4 py-2">
+                        <span>🎓</span>
+                        <span class="text-sm text-blue-100">Find Peer Tutors</span>
+                    </div>
+                    <div class="flex items-center gap-2 bg-white/10 rounded-lg px-4 py-2">
+                        <span>🔍</span>
+                        <span class="text-sm text-blue-100">Lost & Found AI matching</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Panel (Forms) -->
+        <div class="w-full md:w-7/12 p-6 sm:p-12 flex flex-col bg-white h-[650px] md:h-auto max-h-[90vh]">
+
+            <!-- Mobile Logo -->
+            <div class="md:hidden flex flex-col items-center mb-6 mt-2 shrink-0">
+                <div class="w-24 h-24 bg-white rounded-lg flex items-center justify-center mb-3 shadow p-2">
+                    <img src="../assets/images/logo.png" alt="Logo" class="max-w-full max-h-full object-contain"
+                        onerror="this.src='https://ui-avatars.com/api/?name=CM&background=fff&color=2563eb&size=96'">
+                </div>
+                <h2 class="text-2xl font-bold text-textdark tracking-tight">CampusMitra</h2>
+            </div>
+
+            <!-- Toggle Buttons -->
+            <div class="flex bg-slate-100 rounded-lg p-1 w-full max-w-sm mx-auto shrink-0 z-10 relative mb-6">
+                <button id="toggleLoginBtn"
+                    class="flex-1 py-2 text-center rounded-md font-semibold transition-all duration-300 text-white bg-primary shadow"
+                    onclick="switchTab('login')">Login</button>
+                <button id="toggleRegisterBtn"
+                    class="flex-1 py-2 text-center rounded-md font-semibold text-gray-500 transition-all duration-300 hover:text-textdark"
+                    onclick="switchTab('register')">Register</button>
+            </div>
+
+            <!-- Scrollable Forms Container -->
+            <div class="flex-1 relative overflow-y-auto custom-scrollbar px-1 pb-4" id="formsContainer">
+
+                <!-- Login Form -->
+                <form id="loginForm" class="w-full fade-in pb-4" onsubmit="handleLogin(event)">
+                    <div class="mb-6 text-center">
+                        <h3 class="text-2xl font-bold text-textdark">Welcome Back</h3>
+                        <p class="text-gray-500 text-sm mt-1">Please enter your details to sign in.</p>
+                    </div>
+
+                    <div class="space-y-4 max-w-sm mx-auto">
+                        <div class="form-group">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">College Email</label>
+                            <input type="email" id="loginEmail"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all placeholder-gray-400 bg-gray-50/50 focus:bg-white"
+                                placeholder="user@college.ac.in">
+                            <p id="loginEmailError" class="text-danger text-xs mt-1.5 hidden font-medium"></p>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                            <input type="password" id="loginPassword"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all placeholder-gray-400 bg-gray-50/50 focus:bg-white"
+                                placeholder="••••••••">
+                            <p id="loginPasswordError" class="text-danger text-xs mt-1.5 hidden font-medium"></p>
+                        </div>
+
+                        <div class="flex items-center justify-between pt-1">
+                            <label class="flex items-center text-sm text-gray-600 cursor-pointer">
+                                <input type="checkbox" id="rememberMe"
+                                    class="mr-2 w-4 h-4 text-primary focus:ring-primary border-gray-300 rounded">
+                                <span>Remember me</span>
+                            </label>
+                            <a href="#"
+                                class="text-sm text-primary hover:text-secondary hover:underline font-medium transition-colors">Forgot
+                                password?</a>
+                        </div>
+
+                        <button type="submit"
+                            class="w-full bg-primary hover:bg-secondary text-white font-semibold py-3 px-4 rounded-lg shadow hover:shadow-lg transition-all transform hover:-translate-y-0.5 mt-4">
+                            Log In
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Register Form -->
+                <form id="registerForm" class="w-full hidden pb-4" onsubmit="handleRegister(event)">
+                    <div class="mb-5 text-center">
+                        <h3 class="text-2xl font-bold text-textdark">Create an Account</h3>
+                        <p class="text-gray-500 text-sm mt-1">Join the campus community today.</p>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div class="form-group">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                            <input type="text" id="regName"
+                                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all placeholder-gray-400 bg-gray-50/50 focus:bg-white"
+                                placeholder="Akshaya">
+                            <p id="regNameError" class="text-danger text-xs mt-1 hidden"></p>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div class="form-group">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Roll Number</label>
+                                <input type="text" id="regRollNo"
+                                    class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all placeholder-gray-400 bg-gray-50/50 focus:bg-white"
+                                    placeholder="e.g. 24B81A67XX">
+                                <p id="regRollNoError" class="text-danger text-xs mt-1 hidden"></p>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">College Email</label>
+                                <input type="email" id="regEmail"
+                                    class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all placeholder-gray-400 bg-gray-50/50 focus:bg-white"
+                                    placeholder="user@college.ac.in">
+                                <p id="regEmailError" class="text-danger text-xs mt-1 hidden"></p>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div class="form-group">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Branch</label>
+                                <select id="regBranch"
+                                    class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all bg-gray-50/50 focus:bg-white text-gray-700">
+                                    <option value="">Select Branch</option>
+                                    <option value="CS">Computer Science</option>
+                                    <option value="IT">Information Technology</option>
+                                    <option value="ENTC">E&TC</option>
+                                    <option value="Mechanical">Mechanical</option>
+                                    <option value="Civil">Civil</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                                <p id="regBranchError" class="text-danger text-xs mt-1 hidden"></p>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Year</label>
+                                <select id="regYear"
+                                    class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all bg-gray-50/50 focus:bg-white text-gray-700">
+                                    <option value="">Select Year</option>
+                                    <option value="I">First Year (I)</option>
+                                    <option value="II">Second Year (II)</option>
+                                    <option value="III">Third Year (III)</option>
+                                    <option value="IV">Fourth Year (IV)</option>
+                                </select>
+                                <p id="regYearError" class="text-danger text-xs mt-1 hidden"></p>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div class="form-group">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                                <input type="password" id="regPassword"
+                                    class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all placeholder-gray-400 bg-gray-50/50 focus:bg-white"
+                                    placeholder="••••••••">
+                                <p id="regPasswordError" class="text-danger text-xs mt-1 hidden"></p>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Confirm Password</label>
+                                <input type="password" id="regConfirmPassword"
+                                    class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all placeholder-gray-400 bg-gray-50/50 focus:bg-white"
+                                    placeholder="••••••••">
+                                <p id="regConfirmPasswordError" class="text-danger text-xs mt-1 hidden"></p>
+                            </div>
+                        </div>
+
+                        <button type="submit"
+                            class="w-full bg-primary hover:bg-secondary text-white font-semibold py-3 px-4 rounded-lg shadow hover:shadow-lg transition-all transform hover:-translate-y-0.5 mt-2">
+                            Create Account
+                        </button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/auth.js"></script>
+</body>
+
+</html>

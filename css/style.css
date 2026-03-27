@@ -1,0 +1,68 @@
+/* Custom Scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    /* slate-300 */
+    border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+    /* slate-400 */
+}
+
+/* Fallback for firefox */
+.custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e1 transparent;
+}
+
+/* Fade in animation */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px) scale(0.98);
+        pointer-events: none;
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        pointer-events: auto;
+    }
+}
+
+.fade-in {
+    animation: fadeIn 0.4s ease-out forwards;
+}
+
+/* ── Global font size bumps ───────────────────── */
+body {
+    font-size: 16px;
+}
+
+/* Nav links */
+header nav a {
+    font-size: 0.9375rem;
+    /* 15px */
+}
+
+/* Mobile menu links */
+#mobile-menu a {
+    font-size: 1rem;
+    /* 16px */
+}
+
+/* Auth buttons */
+#auth-buttons a,
+#mobile-menu .flex a {
+    font-size: 0.9375rem;
+    /* 15px */
+}
