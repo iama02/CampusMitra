@@ -84,10 +84,18 @@ function renderItems(items) {
         const isAvailable = item.status === "Available";
         const badgeClass = isAvailable ? "bg-success" : "bg-warning bg-orange-400";
 
-        // Button HTML changes based on availability
-        const requestButton = isAvailable
-            ? `<button onclick="requestBorrow('${item.name}', '${item.owner}')" class="text-sm font-semibold bg-gray-50 text-gray-700 hover:bg-primary hover:text-white px-4 py-2 rounded-lg transition-all border border-gray-200 hover:border-primary">Request</button>`
-            : `<button onclick="alert('Item currently in use. You can join the waitlist!')" class="text-sm font-semibold bg-white text-gray-400 px-4 py-2 rounded-lg border border-gray-200 cursor-not-allowed">Waitlist</button>`;
+        // Button HTML changes based on availability and ownership
+        let requestButton = '';
+        if (item.owner === 'You (Current User)') {
+            requestButton = `
+                <button disabled class="text-xs font-semibold bg-gray-100 text-gray-400 px-3 py-2 rounded-lg border border-gray-200 cursor-not-allowed hidden sm:inline-block">Your Item</button>
+                <button onclick="removeItem(${item.id})" class="text-xs font-semibold bg-red-50 text-red-600 hover:bg-red-600 hover:text-white px-3 py-2 rounded-lg transition-all border border-red-200 hover:border-red-600">Remove</button>
+            `;
+        } else if (isAvailable) {
+            requestButton = `<button onclick="requestBorrow('${item.name}', '${item.owner}')" class="text-sm font-semibold bg-gray-50 text-gray-700 hover:bg-primary hover:text-white px-4 py-2 rounded-lg transition-all border border-gray-200 hover:border-primary">Request</button>`;
+        } else {
+            requestButton = `<button onclick="alert('Item currently in use. You can join the waitlist!')" class="text-sm font-semibold bg-white text-gray-400 px-4 py-2 rounded-lg border border-gray-200 cursor-not-allowed">Waitlist</button>`;
+        }
 
         // Card HTML string (simulating our hardcoded UI)
         const cardHTML = `
@@ -131,12 +139,26 @@ window.handleListSubmit = async function (event) {
     const description = document.getElementById('itemDesc').value;
     const price = document.getElementById('itemPrice').value;
     const timeUnit = document.getElementById('itemTimeUnit').value;
+    const imageInput = document.getElementById('itemImage');
+
+    let base64Image = "../assets/images/logo.png"; // Fallback placeholder
+    if (imageInput && imageInput.files && imageInput.files[0]) {
+        const file = imageInput.files[0];
+        base64Image = await new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result);
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+        });
+    }
 
     const newItemData = {
         name,
         description,
         price,
-        timeUnit
+        timeUnit,
+        image: base64Image,
+        owner: "You (Current User)"
     };
 
     try {
@@ -197,5 +219,33 @@ window.handleListSubmit = async function (event) {
             toast.classList.remove('translate-y-0', 'opacity-100');
             toast.classList.add('translate-y-20', 'opacity-0', 'pointer-events-none');
         }, 3000);
+    }
+}
+
+// 4. DELETE Request: Remove item from backend
+window.removeItem = async function(id) {
+    if (!confirm("Are you sure you want to remove this item?")) return;
+    
+    try {
+        const response = await fetch(`${API_URL}/${id}`, {
+            method: 'DELETE'
+        });
+        
+        if (response.ok) {
+            // Refetch to update grid
+            fetchItems();
+        } else {
+            console.warn("Failed to delete the item from backend, simulating delete locally.");
+            allItems = allItems.filter(i => i.id !== id);
+            const filterVal = document.getElementById('categoryFilter') ? document.getElementById('categoryFilter').value : 'All Categories';
+            if (filterVal !== 'All Categories') {
+                renderItems(allItems.filter(item => item.category === filterVal));
+            } else {
+                renderItems(allItems);
+            }
+        }
+    } catch (error) {
+        console.error("Error deleting item:", error);
+        alert('An error occurred while deleting.');
     }
 }
