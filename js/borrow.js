@@ -84,9 +84,12 @@ function renderItems(items) {
         const isAvailable = item.status === "Available";
         const badgeClass = isAvailable ? "bg-success" : "bg-warning bg-orange-400";
 
-        // Button HTML changes based on availability and ownership
+        const userJson = localStorage.getItem('user');
+        const userObj = userJson ? JSON.parse(userJson) : null;
+        const isOwner = userObj ? (item.owner === userObj.name) : false;
+
         let requestButton = '';
-        if (item.owner === 'You (Current User)') {
+        if (isOwner) {
             requestButton = `
                 <button disabled class="text-xs font-semibold bg-gray-100 text-gray-400 px-3 py-2 rounded-lg border border-gray-200 cursor-not-allowed hidden sm:inline-block">Your Item</button>
                 <button onclick="removeItem(${item.id})" class="text-xs font-semibold bg-red-50 text-red-600 hover:bg-red-600 hover:text-white px-3 py-2 rounded-lg transition-all border border-red-200 hover:border-red-600">Remove</button>
@@ -152,13 +155,17 @@ window.handleListSubmit = async function (event) {
         });
     }
 
+    const userJson = localStorage.getItem('user');
+    const userObj = userJson ? JSON.parse(userJson) : null;
+    const currentOwner = userObj ? userObj.name : "Anonymous";
+
     const newItemData = {
         name,
         description,
         price,
         timeUnit,
         image: base64Image,
-        owner: "You (Current User)"
+        owner: currentOwner
     };
 
     try {

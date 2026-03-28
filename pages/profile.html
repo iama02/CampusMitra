@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My Profile — CampusMitra</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'], },
+                    colors: { primary: '#2563eb', secondary: '#4f46e5', success: '#10b981', danger: '#ef4444' }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="../css/style.css" />
+</head>
+
+<body class="bg-[#f8fafc] text-[#111827] antialiased min-h-screen flex flex-col">
+
+    <!-- ===== HEADER ===== -->
+    <header class="fixed top-0 left-0 right-0 z-50 transition-all duration-300 bg-white/80 backdrop-blur-md border-b border-gray-100">
+        <div class="max-w-7xl mx-auto px-6 py-2 flex items-center justify-between">
+            <a href="../index.html" class="flex items-center gap-4 group">
+                <img src="../assets/images/logo_no_bg.png" onerror="this.style.display='none'" class="h-28 w-auto transition-transform group-hover:scale-105 -my-8" />
+                <span class="font-bold text-xl tracking-tight hidden sm:block text-gray-900">CampusMitra</span>
+            </a>
+            <nav class="hidden md:flex items-center gap-8">
+                <a href="../index.html" class="text-gray-600 text-sm font-medium hover:text-primary transition-colors duration-200">Home</a>
+                <a href="borrow.html" class="text-gray-600 text-sm font-medium hover:text-primary transition-colors duration-200">Borrow & Rent</a>
+                <a href="tuition.html" class="text-gray-600 text-sm font-medium hover:text-primary transition-colors duration-200">Peer Tutoring</a>
+                <a href="lostfound.html" class="text-gray-600 text-sm font-medium hover:text-primary transition-colors duration-200">Lost & Found</a>
+            </nav>
+            <div class="flex items-center gap-3">
+                <div id="auth-buttons" class="hidden md:flex items-center gap-4">
+                    <!-- AuthState.js will inject here -->
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="h-24 md:h-32"></div>
+
+    <!-- ===== MAIN CONTENT ===== -->
+    <main class="flex-1 w-full max-w-5xl mx-auto px-6 pb-20 fade-in">
+        
+        <!-- Profile Header Card (Glassmorphism) -->
+        <div class="relative w-full rounded-3xl overflow-hidden shadow-lg border border-white/40 mb-10 bg-white">
+            <!-- Background Gradient Banner -->
+            <div class="h-32 md:h-48 w-full bg-gradient-to-r from-primary via-indigo-500 to-secondary relative">
+                <div class="absolute inset-0 bg-white/10 backdrop-blur-sm"></div>
+            </div>
+            
+            <div class="px-8 pb-8 flex flex-col sm:flex-row items-center sm:items-end gap-6 relative -mt-16 sm:-mt-20">
+                <!-- Avatar -->
+                <div id="profileAvatar" class="w-32 h-32 rounded-full border-4 border-white bg-gradient-to-br from-blue-50 to-indigo-50 text-primary flex items-center justify-center text-5xl font-extrabold shadow-md shrink-0">
+                    ?
+                </div>
+                
+                <!-- Info -->
+                <div class="text-center sm:text-left flex-1">
+                    <h1 id="profileName" class="text-3xl font-extrabold text-gray-900 tracking-tight">Loading...</h1>
+                    <p id="profileEmail" class="text-gray-500 font-medium text-sm mt-1"></p>
+                </div>
+                
+                <!-- Edit Action -->
+                <button onclick="openSettings()" class="px-5 py-2.5 bg-gray-50 hover:bg-gray-100 text-gray-700 text-sm font-semibold rounded-full border border-gray-200 transition-colors shadow-sm mt-4 sm:mt-0">
+                    Settings
+                </button>
+            </div>
+        </div>
+
+        <!-- Dashboard Stats Grid -->
+        <h2 class="text-xl font-bold text-gray-900 mb-6">Your Activity</h2>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+            <!-- Stat 1 -->
+            <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
+                <div class="absolute -right-4 -top-4 w-24 h-24 bg-blue-50 rounded-full group-hover:scale-110 transition-transform"></div>
+                <div class="relative z-10">
+                    <div class="w-12 h-12 bg-blue-100 text-primary rounded-xl flex items-center justify-center text-2xl mb-4">📦</div>
+                    <p class="text-gray-500 text-sm font-semibold mb-1">Items Listed</p>
+                    <h3 id="statItems" class="text-4xl font-black text-gray-900">0</h3>
+                </div>
+            </div>
+
+            <!-- Stat 2 -->
+            <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
+                <div class="absolute -right-4 -top-4 w-24 h-24 bg-indigo-50 rounded-full group-hover:scale-110 transition-transform"></div>
+                <div class="relative z-10">
+                    <div class="w-12 h-12 bg-indigo-100 text-secondary rounded-xl flex items-center justify-center text-2xl mb-4">🎓</div>
+                    <p class="text-gray-500 text-sm font-semibold mb-1">Tutoring Sessions</p>
+                    <h3 id="statTutor" class="text-4xl font-black text-gray-900">0</h3>
+                </div>
+            </div>
+
+            <!-- Stat 3 -->
+            <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
+                <div class="absolute -right-4 -top-4 w-24 h-24 bg-emerald-50 rounded-full group-hover:scale-110 transition-transform"></div>
+                <div class="relative z-10">
+                    <div class="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-xl flex items-center justify-center text-2xl mb-4">🔍</div>
+                    <p class="text-gray-500 text-sm font-semibold mb-1">Lost & Found Reports</p>
+                    <h3 id="statLost" class="text-4xl font-black text-gray-900">0</h3>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Uploads List -->
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+            <h2 class="text-lg font-bold text-gray-900 mb-4 pb-4 border-b border-gray-100">Your Listed Items</h2>
+            <div id="userItemsList" class="space-y-4">
+                <div class="text-center py-8 text-gray-400 font-medium text-sm">
+                    <div class="animate-spin inline-block w-6 h-6 border-2 border-current border-t-transparent text-primary rounded-full mb-3"></div>
+                    <p>Loading your items...</p>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- ===== SETTINGS MODAL ===== -->
+    <div id="settingsModal" class="fixed inset-0 z-[100] hidden items-center justify-center pointer-events-none">
+        <div id="settingsBackdrop" class="absolute inset-0 bg-gray-900/40 backdrop-blur-sm opacity-0 transition-opacity duration-300" onclick="closeSettings()"></div>
+        <div id="settingsContent" class="bg-white rounded-2xl shadow-2xl p-6 sm:p-8 max-w-md w-full mx-4 transform scale-95 opacity-0 transition-all duration-300 relative z-10 flex flex-col">
+            <button onclick="closeSettings()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-700 transition-colors">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+            <h3 class="text-2xl font-bold text-gray-900 mb-6">Profile Settings</h3>
+            
+            <div class="space-y-4">
+                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-100">
+                    <div>
+                        <p class="font-bold text-gray-900 text-sm">Email Notifications</p>
+                        <p class="text-xs text-gray-500 font-medium mt-0.5">Alerts for pending borrow requests</p>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" value="" class="sr-only peer" checked>
+                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                    </label>
+                </div>
+                
+                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-100">
+                    <div>
+                        <p class="font-bold text-gray-900 text-sm">Public Profile</p>
+                        <p class="text-xs text-gray-500 font-medium mt-0.5">Let peers see your listed items</p>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" value="" class="sr-only peer" checked>
+                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                    </label>
+                </div>
+
+                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-100">
+                    <div>
+                        <p class="font-bold text-gray-900 text-sm">Dark Mode</p>
+                        <p class="text-xs text-gray-500 font-medium mt-0.5">Toggle dark appearance</p>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" value="" class="sr-only peer">
+                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                    </label>
+                </div>
+            </div>
+
+            <button onclick="closeSettings()" class="w-full bg-primary hover:bg-secondary text-white font-semibold py-3 px-4 rounded-xl shadow-md transition-all mt-8 transform hover:-translate-y-0.5">
+                Save Changes
+            </button>
+        </div>
+    </div>
+
+    <!-- ===== FOOTER ===== -->
+    <footer class="bg-white border-t border-gray-100 py-10 mt-auto">
+        <div class="max-w-7xl mx-auto px-6 flex justify-between items-center text-sm text-gray-500 font-medium">
+            <div>CampusMitra © 2026</div>
+            <div class="flex gap-4"><a href="#" class="hover:text-primary transition">Privacy</a><a href="#" class="hover:text-primary transition">Terms</a></div>
+        </div>
+    </footer>
+
+    <script src="../js/authState.js"></script>
+    <script src="../js/profile.js"></script>
+</body>
+</html>

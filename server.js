@@ -3,6 +3,8 @@ const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
 const BorrowItem = require('./models/borrowItem');
+const User = require('./models/user');
+const jwt = require('jsonwebtoken');
 
 const app = express();
 const PORT = 3000;
@@ -65,6 +67,60 @@ app.delete('/api/items/:id', async (req, res) => {
         res.json({ message: "Item deleted successfully" });
     } catch (err) {
         res.status(500).json({ message: "Error deleting item", error: err.message });
+    }
+});
+
+// --- AUTHENTICATION ENDPOINTS ---
+
+// Register User
+app.post('/api/auth/register', async (req, res) => {
+    try {
+        const { name, rollNo, email, branch, year, password } = req.body;
+
+        // Check if user already exists
+        const existingUser = await User.findOne({ $or: [{ email }, { rollNo }] });
+        if (existingUser) {
+            return res.status(400).json({ message: 'User with this email or roll number already exists' });
+        }
+
+        const newUser = new User({ name, rollNo, email, branch, year, password });
+        await newUser.save();
+        
+        res.status(201).json({ message: 'Registration successful! You can now log in.' });
+    } catch (err) {
+        res.status(500).json({ message: 'Error during registration', error: err.message });
+    }
+});
+
+// Login User
+app.post('/api/auth/login', async (req, res) => {
+    try {
+        const { email, password } = req.body;
+
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(400).json({ message: 'Invalid credentials' });
+        }
+
+        const isMatch = await user.comparePassword(password);
+        if (!isMatch) {
+            return res.status(400).json({ message: 'Invalid credentials' });
+        }
+
+        // Generate JWT Token
+        const token = jwt.sign(
+            { id: user._id, name: user.name, email: user.email },
+            process.env.JWT_SECRET || 'campusmitra_super_secret_key_2026',
+            { expiresIn: '7d' }
+        );
+
+        res.json({
+            message: 'Login successful!',
+            token,
+            user: { id: user._id, name: user.name, email: user.email }
+        });
+    } catch (err) {
+        res.status(500).json({ message: 'Error during login', error: err.message });
     }
 });
 

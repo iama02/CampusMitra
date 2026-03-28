@@ -57,7 +57,7 @@ function isValidCollegeEmail(email) {
     return email.toLowerCase().endsWith('.ac.in');
 }
 
-function handleLogin(e) {
+async function handleLogin(e) {
     e.preventDefault();
     let isValid = true;
 
@@ -81,25 +81,41 @@ function handleLogin(e) {
     }
 
     if (isValid) {
-        // Assuming success
-        console.log('Login attempt', { email, remember: document.getElementById('rememberMe').checked });
-
-        // Show success state briefly (optional, simulating redirect)
         const btn = e.target.querySelector('button[type="submit"]');
         const originalText = btn.textContent;
         btn.innerHTML = `<span class="flex items-center justify-center"><svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Signing In...</span>`;
         btn.classList.add('opacity-75', 'cursor-not-allowed');
 
-        setTimeout(() => {
+        try {
+            const response = await fetch('http://localhost:3000/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            });
+            const data = await response.json();
+
             btn.innerHTML = originalText;
             btn.classList.remove('opacity-75', 'cursor-not-allowed');
-            alert('Login implementation goes here.');
-            // window.location.href = 'index.html'; // Example redirect
-        }, 1000);
+
+            if (response.ok) {
+                // Save token and user info
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('user', JSON.stringify(data.user));
+                
+                // Redirect to home
+                window.location.href = '../index.html';
+            } else {
+                showError('loginPassword', data.message || 'Login failed');
+            }
+        } catch (error) {
+            btn.innerHTML = originalText;
+            btn.classList.remove('opacity-75', 'cursor-not-allowed');
+            showError('loginPassword', 'Server is fully down. Please try again later.');
+        }
     }
 }
 
-function handleRegister(e) {
+async function handleRegister(e) {
     e.preventDefault();
     let isValid = true;
 
@@ -159,19 +175,34 @@ function handleRegister(e) {
     }
 
     if (isValid) {
-        console.log('Registration details', { name, rollNo, email, branch, year });
-
         const btn = e.target.querySelector('button[type="submit"]');
         const originalText = btn.textContent;
         btn.innerHTML = `<span class="flex items-center justify-center"><svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Creating...</span>`;
         btn.classList.add('opacity-75', 'cursor-not-allowed');
 
-        setTimeout(() => {
+        try {
+            const response = await fetch('http://localhost:3000/api/auth/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, rollNo, email, branch, year, password })
+            });
+            const data = await response.json();
+
             btn.innerHTML = originalText;
             btn.classList.remove('opacity-75', 'cursor-not-allowed');
-            alert('Registration Successful! Please login.');
-            e.target.reset(); // clear the form
-            switchTab('login'); // switch to login view
-        }, 1000);
+
+            if (response.ok) {
+                // Success
+                alert('Registration Successful! Please login.');
+                e.target.reset(); // clear the form
+                switchTab('login'); // switch to login view
+            } else {
+                showError('regEmail', data.message || 'Registration failed');
+            }
+        } catch (error) {
+            btn.innerHTML = originalText;
+            btn.classList.remove('opacity-75', 'cursor-not-allowed');
+            showError('regEmail', 'Server error. Please try again.');
+        }
     }
 }
