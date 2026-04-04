@@ -139,7 +139,7 @@
         </div>
 
         <!-- Recent Uploads List -->
-        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 mb-10">
             <h2 class="text-lg font-bold text-gray-900 mb-4 pb-4 border-b border-gray-100">Your Listed Items</h2>
             <div id="userItemsList" class="space-y-4">
                 <div class="text-center py-8 text-gray-400 font-medium text-sm">
@@ -147,6 +147,38 @@
                         class="animate-spin inline-block w-6 h-6 border-2 border-current border-t-transparent text-primary rounded-full mb-3">
                     </div>
                     <p>Loading your items...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tutoring Requests Management -->
+        <h2 class="text-xl font-bold text-gray-900 mb-6">Tutoring Requests</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Incoming Requests (For Tutors) -->
+            <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 flex flex-col">
+                <div class="flex items-center gap-3 mb-4 pb-4 border-b border-gray-100">
+                    <div class="w-10 h-10 rounded-xl bg-indigo-50 text-secondary flex items-center justify-center text-lg">📥</div>
+                    <div>
+                        <h2 class="text-lg font-bold text-gray-900">Incoming Requests</h2>
+                        <p class="text-xs text-gray-500 font-medium">Students asking for your help</p>
+                    </div>
+                </div>
+                <div id="incomingRequestsList" class="space-y-4 flex-1">
+                    <div class="text-center py-8 text-gray-400 font-medium text-sm">Loading requests...</div>
+                </div>
+            </div>
+
+            <!-- Outgoing Requests (For Students) -->
+            <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 flex flex-col">
+                <div class="flex items-center gap-3 mb-4 pb-4 border-b border-gray-100">
+                    <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg">📤</div>
+                    <div>
+                        <h2 class="text-lg font-bold text-gray-900">Your Session Requests</h2>
+                        <p class="text-xs text-gray-500 font-medium">Requests you made to other tutors</p>
+                    </div>
+                </div>
+                <div id="outgoingRequestsList" class="space-y-4 flex-1">
+                    <div class="text-center py-8 text-gray-400 font-medium text-sm">Loading requests...</div>
                 </div>
             </div>
         </div>
