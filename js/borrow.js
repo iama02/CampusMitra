@@ -95,7 +95,7 @@ function renderItems(items) {
                 <button onclick="removeItem(${item.id})" class="text-xs font-semibold bg-red-50 text-red-600 hover:bg-red-600 hover:text-white px-3 py-2 rounded-lg transition-all border border-red-200 hover:border-red-600">Remove</button>
             `;
         } else if (isAvailable) {
-            requestButton = `<button onclick="requestBorrow('${item.name}', '${item.owner}')" class="text-sm font-semibold bg-gray-50 text-gray-700 hover:bg-primary hover:text-white px-4 py-2 rounded-lg transition-all border border-gray-200 hover:border-primary">Request</button>`;
+            requestButton = `<button onclick="requestBorrow(${item.id}, '${item.name.replace(/'/g, "\\'")}', '${item.owner.replace(/'/g, "\\'")}')" class="text-sm font-semibold bg-gray-50 text-gray-700 hover:bg-primary hover:text-white px-4 py-2 rounded-lg transition-all border border-gray-200 hover:border-primary">Request</button>`;
         } else {
             requestButton = `<button onclick="alert('Item currently in use. You can join the waitlist!')" class="text-sm font-semibold bg-white text-gray-400 px-4 py-2 rounded-lg border border-gray-200 cursor-not-allowed">Waitlist</button>`;
         }
@@ -256,3 +256,30 @@ window.removeItem = async function(id) {
         alert('An error occurred while deleting.');
     }
 }
+
+// 5. POST Request: Submit borrow request to backend
+window.requestBorrow = async function(itemId, itemName, ownerName) {
+    const token = localStorage.getItem('token');
+    if (!token) {
+        alert("Please login to request items.");
+        window.location.href = 'auth.html';
+        return;
+    }
+
+    try {
+        const response = await fetch(`http://localhost:3000/api/items/${itemId}/request`, {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        
+        const data = await response.json();
+        if (response.ok) {
+            showRequestModal(itemName, ownerName);
+        } else {
+            alert(data.message || "Failed to send request.");
+        }
+    } catch (error) {
+        console.error("Error requesting item:", error);
+        alert("Failed to send request, please try again.");
+    }
+};

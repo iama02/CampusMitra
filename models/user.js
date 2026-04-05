@@ -32,6 +32,19 @@ const userSchema = new mongoose.Schema({
     password: {
         type: String,
         required: true
+    },
+    whatsappNumber: {
+        type: String,
+        trim: true,
+        default: ''
+    },
+    averageRating: {
+        type: Number,
+        default: 0
+    },
+    ratingCount: {
+        type: Number,
+        default: 0
     }
 }, { timestamps: true });
 

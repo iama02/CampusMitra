@@ -38,46 +38,42 @@
     <!-- ===== HEADER ===== -->
     <header id="navbar"
         class="fixed top-0 left-0 right-0 z-50 transition-all duration-300 bg-white/80 backdrop-blur-md border-b border-gray-100">
-        <div class="max-w-7xl mx-auto px-6 py-2 flex items-center justify-between">
+        <div class="max-w-7xl mx-auto px-8 py-4 md:py-6 flex items-center justify-between">
 
             <!-- Logo -->
             <a href="index.html" class="flex items-center gap-4 group">
                 <img src="assets/images/logo_no_bg.png" alt="CampusMitra Logo"
-                    class="h-28 w-auto transition-transform group-hover:scale-105 -my-8" />
-                <span class="font-bold text-xl tracking-tight hidden sm:block text-gray-900">CampusMitra</span>
+                    class="h-28 w-auto transform scale-110 md:scale-[1.35] transition-transform group-hover:scale-125 -my-8" />
+                <span class="font-extrabold text-2xl md:text-3xl tracking-tight hidden sm:block text-gray-900 ml-4 md:ml-8">CampusMitra</span>
             </a>
 
             <!-- Nav Links (desktop) -->
-            <nav class="hidden md:flex items-center gap-8">
+            <nav class="hidden md:flex items-center gap-10">
                 <a href="#home"
-                    class="text-gray-600 text-sm font-medium hover:text-primary transition-colors duration-200">
+                    class="text-gray-600 text-base font-semibold hover:text-primary transition-colors duration-200">
                     Home
                 </a>
                 <a href="pages/borrow.html"
-                    class="text-gray-600 text-sm font-medium hover:text-primary transition-colors duration-200">
+                    class="text-gray-600 text-base font-semibold hover:text-primary transition-colors duration-200">
                     Borrow & Rent
                 </a>
                 <a href="pages/tuition.html"
-                    class="text-gray-600 text-sm font-medium hover:text-primary transition-colors duration-200">
+                    class="text-gray-600 text-base font-semibold hover:text-primary transition-colors duration-200">
                     Peer Tutoring
                 </a>
                 <a href="pages/lostfound.html"
-                    class="text-gray-600 text-sm font-medium hover:text-primary transition-colors duration-200">
+                    class="text-gray-600 text-base font-semibold hover:text-primary transition-colors duration-200">
                     Lost & Found
                 </a>
             </nav>
 
             <!-- Auth Buttons + Mobile Menu Toggle -->
-            <div class="flex items-center gap-3">
+            <div class="flex items-center gap-4">
 
                 <!-- Desktop Auth Buttons -->
                 <div id="auth-buttons" class="hidden md:flex items-center gap-4">
-                    <!-- <a href="pages/auth.html"
-                        class="text-sm font-semibold text-gray-700 hover:text-primary transition-colors duration-200">
-                        Log in
-                    </a> -->
                     <a href="pages/auth.html"
-                        class="text-sm font-semibold bg-primary text-white px-5 py-2.5 rounded-full hover:bg-secondary hover:shadow-lg hover:shadow-primary/30 transform hover:-translate-y-0.5 transition-all duration-200">
+                        class="text-base font-bold bg-primary text-white px-7 py-3 rounded-full hover:bg-secondary hover:shadow-lg hover:shadow-primary/30 transform hover:-translate-y-0.5 transition-all duration-200">
                         Join Community
                     </a>
                 </div>
@@ -136,7 +132,8 @@
     <!-- ===== HERO SECTION ===== -->
     <section
         class="max-w-7xl mx-auto px-6 py-16 md:py-24 flex flex-col md:flex-row items-center gap-12 text-center md:text-left">
-        <div class="md:w-1/2 flex flex-col items-center md:items-start fade-in">
+        
+        <div class="w-full md:w-1/2 flex flex-col items-center md:items-start fade-in">
             <div
                 class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-50 text-primary text-sm font-semibold mb-6 border border-blue-100">
                 <span class="relative flex h-2 w-2">
@@ -180,7 +177,7 @@
             </div>
         </div>
 
-        <div class="md:w-1/2 relative fade-in" style="animation-delay: 0.2s;">
+        <div class="w-full mt-10 md:mt-0 md:w-1/2 relative fade-in" style="animation-delay: 0.2s;">
             <!-- Abstract illustration placeholder -->
             <div class="relative w-full aspect-square max-w-md mx-auto">
                 <div

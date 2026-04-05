@@ -129,6 +129,7 @@ async function handleRegister(e) {
     const year = document.getElementById('regYear').value;
     const password = document.getElementById('regPassword').value;
     const confirmPassword = document.getElementById('regConfirmPassword').value;
+    const whatsappNumber = document.getElementById('regWhatsapp').value.trim();
 
     if (!name) {
         showError('regName', 'Full Name is required');
@@ -184,7 +185,7 @@ async function handleRegister(e) {
             const response = await fetch('http://localhost:3000/api/auth/register', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, rollNo, email, branch, year, password })
+                body: JSON.stringify({ name, rollNo, email, branch, year, password, whatsappNumber })
             });
             const data = await response.json();
 
@@ -193,7 +194,7 @@ async function handleRegister(e) {
 
             if (response.ok) {
                 // Success
-                alert('Registration Successful! Please login.');
+                showToast('Registration Successful!', 'Please login to continue.');
                 e.target.reset(); // clear the form
                 switchTab('login'); // switch to login view
             } else {
@@ -204,5 +205,24 @@ async function handleRegister(e) {
             btn.classList.remove('opacity-75', 'cursor-not-allowed');
             showError('regEmail', 'Server error. Please try again.');
         }
+    }
+}
+
+function showToast(title, message) {
+    const toast = document.getElementById('toastNotification');
+    const toastTitle = document.getElementById('toastTitle');
+    const toastMessage = document.getElementById('toastMessage');
+
+    if (toast && toastTitle && toastMessage) {
+        toastTitle.textContent = title;
+        toastMessage.textContent = message;
+
+        toast.classList.remove('translate-y-20', 'opacity-0', 'pointer-events-none');
+        toast.classList.add('translate-y-0', 'opacity-100');
+
+        setTimeout(() => {
+            toast.classList.remove('translate-y-0', 'opacity-100');
+            toast.classList.add('translate-y-20', 'opacity-0', 'pointer-events-none');
+        }, 3000);
     }
 }

@@ -25,8 +25,59 @@ const DEFAULT_TUTORS = [
 
 let tutorsCache = [];
 
+let tutorIdToDelete = null;
+
 document.addEventListener('DOMContentLoaded', () => {
     fetchTutors();
+    
+    const confirmBtn = document.getElementById('confirmDeleteBtn');
+    if (confirmBtn) {
+        confirmBtn.addEventListener('click', async () => {
+            if (!tutorIdToDelete) return;
+            
+            const tutorId = tutorIdToDelete;
+            const token = localStorage.getItem('token');
+            if (!token) {
+                showToast('Login Required', 'Please log in before modifying your profile.');
+                closeDeleteModal();
+                return;
+            }
+
+            if (String(tutorId).startsWith('mock-')) {
+                showToast('Backend Needed', 'Cannot delete mock data.');
+                closeDeleteModal();
+                return;
+            }
+
+            const originalText = confirmBtn.textContent;
+            confirmBtn.textContent = 'Deleting...';
+            confirmBtn.disabled = true;
+
+            try {
+                const response = await fetch(`${TUTORS_API_URL}/${tutorId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        ...getAuthHeaders()
+                    }
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.message || 'Unable to delete tutor profile');
+                }
+
+                showToast('Profile Deleted', data.message || 'Your tutor profile has been removed.');
+                closeDeleteModal();
+                await fetchTutors();
+            } catch (error) {
+                showToast('Deletion Failed', error.message || 'Please try again.');
+            } finally {
+                confirmBtn.textContent = originalText;
+                confirmBtn.disabled = false;
+            }
+        });
+    }
 });
 
 function getCurrentUser() {
@@ -72,9 +123,14 @@ function renderTutors(tutors) {
 
         const actionButton = isOwner
             ? `
-                <button disabled class="w-full text-sm font-semibold bg-gray-100 text-gray-400 border border-gray-200 px-4 py-2.5 rounded-xl cursor-not-allowed">
-                    Your Profile
-                </button>
+                <div class="flex gap-2 w-full">
+                    <button disabled class="flex-1 text-sm font-semibold bg-gray-100 text-gray-400 border border-gray-200 px-4 py-2.5 rounded-xl cursor-not-allowed">
+                        Your Profile
+                    </button>
+                    <button onclick="deleteTutorProfile('${tutor._id}')" class="text-sm font-semibold bg-white text-danger border border-danger p-2.5 rounded-xl hover:bg-danger hover:text-white transition-colors duration-200" title="Delete Profile">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                    </button>
+                </div>
             `
             : `
                 <button onclick="requestSession('${tutor._id}', '${escapeForSingleQuotedJs(tutor.name)}')" class="w-full text-sm font-semibold bg-white text-primary border border-primary px-4 py-2.5 rounded-xl hover:bg-primary hover:text-white transition-colors duration-200">
@@ -199,6 +255,34 @@ window.requestSession = async function (tutorId, tutorName) {
     } catch (error) {
         showToast('Request Failed', error.message || 'Please try again.');
     }
+};
+
+window.deleteTutorProfile = function (tutorId) {
+    tutorIdToDelete = tutorId;
+    const modal = document.getElementById('deleteModal');
+    const panel = document.getElementById('deleteModalPanel');
+    
+    modal.classList.remove('hidden');
+    // Allow display: block to apply before animating opacity
+    setTimeout(() => {
+        modal.classList.remove('opacity-0');
+        panel.classList.remove('scale-95', 'opacity-0');
+        panel.classList.add('scale-100', 'opacity-100');
+    }, 10);
+};
+
+window.closeDeleteModal = function () {
+    const modal = document.getElementById('deleteModal');
+    const panel = document.getElementById('deleteModalPanel');
+    
+    modal.classList.add('opacity-0');
+    panel.classList.remove('scale-100', 'opacity-100');
+    panel.classList.add('scale-95', 'opacity-0');
+    
+    setTimeout(() => {
+        modal.classList.add('hidden');
+        tutorIdToDelete = null;
+    }, 300);
 };
 
 function escapeForSingleQuotedJs(value) {

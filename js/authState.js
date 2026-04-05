@@ -12,13 +12,13 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Desktop Navbar update
         const profileHtml = `
-            <a href="${pagesPath}profile.html" class="flex items-center gap-2 text-gray-700 hover:text-primary transition-colors font-semibold text-sm group">
-                <div class="w-9 h-9 rounded-full bg-gradient-to-tr from-primary to-secondary text-white flex items-center justify-center font-bold shadow-md transform group-hover:scale-110 transition-transform">
+            <a href="${pagesPath}profile.html" class="flex items-center gap-2 text-gray-700 hover:text-primary transition-colors font-bold text-base md:text-lg pl-2 group">
+                <div class="w-12 h-12 rounded-full bg-gradient-to-tr from-primary to-secondary text-white flex items-center justify-center font-extrabold text-xl shadow-md transform group-hover:scale-110 transition-transform">
                     ${user.name.charAt(0).toUpperCase()}
                 </div>
-                <span class="hidden lg:block">${user.name.split(' ')[0]}</span>
+                <span class="hidden lg:block ml-1">${user.name.split(' ')[0]}</span>
             </a>
-            <button onclick="handleLogout()" class="text-sm font-semibold text-red-600 hover:bg-red-50 px-4 py-2 rounded-full transition-colors border border-red-100 hover:border-red-200">
+            <button onclick="handleLogout()" class="text-base font-bold text-red-600 hover:bg-red-50 px-6 py-2.5 rounded-full transition-colors border-2 border-red-100 hover:border-red-200 ml-4">
                 Logout
             </button>
         `;
