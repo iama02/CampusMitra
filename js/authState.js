@@ -20,7 +20,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div id="notifDropdown" class="hidden absolute right-0 mt-3 w-80 bg-white rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-gray-100 z-50 overflow-hidden transform opacity-0 scale-95 transition-all duration-200 origin-top-right">
                     <div class="px-4 py-3 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
                         <h3 class="text-sm font-bold text-gray-900">Notifications</h3>
-                        <button onclick="markAllRead()" class="text-xs text-primary font-medium hover:underline focus:outline-none">Mark all read</button>
+                        <div class="flex gap-3">
+                            <button onclick="markAllRead()" class="text-xs text-primary font-medium hover:underline focus:outline-none">Mark read</button>
+                            <button onclick="clearAllNotifications()" class="text-xs text-red-500 font-medium hover:underline focus:outline-none">Clear all</button>
+                        </div>
                     </div>
                     <div id="notifList" class="max-h-80 overflow-y-auto custom-scrollbar">
                         <!-- Notifications injected here -->
@@ -169,6 +172,17 @@ window.markAllRead = async function() {
     if (!token) return;
     await fetch('http://localhost:3000/api/notifications/read-all', {
         method: 'PATCH',
+        headers: { 'Authorization': 'Bearer ' + token }
+    });
+    window.fetchNotifications();
+};
+
+window.clearAllNotifications = async function() {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+    if (!confirm("Are you sure you want to permanently delete all notifications?")) return;
+    await fetch('http://localhost:3000/api/notifications', {
+        method: 'DELETE',
         headers: { 'Authorization': 'Bearer ' + token }
     });
     window.fetchNotifications();

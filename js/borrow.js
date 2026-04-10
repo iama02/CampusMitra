@@ -145,39 +145,33 @@ window.handleListSubmit = async function (event) {
     const category = document.getElementById('itemCategory') ? document.getElementById('itemCategory').value : 'General';
     const imageInput = document.getElementById('itemImage');
 
-    let base64Image = "../assets/images/logo.png"; // Fallback placeholder
-    if (imageInput && imageInput.files && imageInput.files[0]) {
-        const file = imageInput.files[0];
-        base64Image = await new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onloadend = () => resolve(reader.result);
-            reader.onerror = reject;
-            reader.readAsDataURL(file);
-        });
-    }
-
     const userJson = localStorage.getItem('user');
     const userObj = userJson ? JSON.parse(userJson) : null;
     const currentOwner = userObj ? userObj.name : "Anonymous";
 
-    const newItemData = {
-        name,
-        description,
-        price,
-        timeUnit,
-        category,
-        image: base64Image,
-        owner: currentOwner
-    };
+    const submitBtn = event.target.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerText;
+    submitBtn.innerText = "Uploading to Cloudinary...";
+    submitBtn.disabled = true;
+
+    // Use FormData for secure binary image streaming
+    const formData = new FormData();
+    formData.append('name', name);
+    formData.append('description', description);
+    formData.append('price', price);
+    formData.append('timeUnit', timeUnit);
+    formData.append('category', category);
+    formData.append('owner', currentOwner);
+    
+    if (imageInput && imageInput.files && imageInput.files[0]) {
+        formData.append('image', imageInput.files[0]);
+    }
 
     try {
         // Send POST request
         const response = await fetch(API_URL, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(newItemData)
+            body: formData
         });
 
         if (response.ok) {
@@ -198,36 +192,11 @@ window.handleListSubmit = async function (event) {
             alert('Failed to list item. Backend returned an error.');
         }
     } catch (error) {
-        console.warn("Error creating item on backend, simulating success:", error);
-
-        // Mock successful item creation
-        newItemData.id = Date.now();
-        // Just adding mock values for attributes not present in the form
-        newItemData.category = "Electronics"; // Default for mockup
-        newItemData.status = "Available";
-        newItemData.owner = "You";
-        newItemData.image = "https://via.placeholder.com/300x200?text=New+Item";
-
-        MOCK_ITEMS.unshift(newItemData); // Add to the top of mock list
-        allItems = [...MOCK_ITEMS];
-
-        // Maintain selected category if filter is applied
-        const filterVal = document.getElementById('categoryFilter') ? document.getElementById('categoryFilter').value : 'All Categories';
-        if (filterVal !== 'All Categories') {
-            renderItems(allItems.filter(item => item.category === filterVal));
-        } else {
-            renderItems(allItems);
-        }
-
-        const toast = document.getElementById('toastNotification');
-        document.getElementById('listItemForm').reset();
-
-        toast.classList.remove('translate-y-20', 'opacity-0', 'pointer-events-none');
-        toast.classList.add('translate-y-0', 'opacity-100');
-        setTimeout(() => {
-            toast.classList.remove('translate-y-0', 'opacity-100');
-            toast.classList.add('translate-y-20', 'opacity-0', 'pointer-events-none');
-        }, 3000);
+        console.warn("Error creating item on backend.", error);
+        alert('Server unreachable. Could not upload your item.');
+    } finally {
+        submitBtn.innerText = originalText;
+        submitBtn.disabled = false;
     }
 }
 

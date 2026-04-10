@@ -14,13 +14,32 @@ const { GoogleGenerativeAI } = require('@google/generative-ai');
 const Notification = require('./models/notification');
 const crypto = require('crypto');
 const nodemailer = require('nodemailer');
+const multer = require('multer');
+const { v2: cloudinary } = require('cloudinary');
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
+
+// Configure Cloudinary
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET
+});
+
+const storage = new CloudinaryStorage({
+    cloudinary: cloudinary,
+    params: {
+        folder: 'campusmitra',
+        allowedFormats: ['jpg', 'png', 'jpeg', 'webp']
+    }
+});
+const upload = multer({ storage: storage });
 
 const app = express();
 const PORT = 3000;
 
 // Middleware
 app.use(cors()); // Allow requests from other origins (like our frontend)
-app.use(express.json({ limit: '50mb' })); // Allow parsing large JSON data specifically for base64 images
+app.use(express.json({ limit: '2mb' })); // We no longer need 50mb because we aren't sending Base64 strings!
 app.use(express.static(__dirname)); // Serve static files from the project folder
 
 // Connect to MongoDB
@@ -62,11 +81,13 @@ app.get('/api/items', async (req, res) => {
 });
 
 // 2. Add a new item (POST)
-app.post('/api/items', async (req, res) => {
+app.post('/api/items', upload.single('image'), async (req, res) => {
     try {
         // Find the maximum existing id to simulate auto-increment for our simple system
         const highestItem = await BorrowItem.findOne().sort('-id').exec();
         const nextId = highestItem && highestItem.id ? highestItem.id + 1 : 1;
+
+        const imageUrl = req.file ? req.file.path : (req.body.image || "../assets/images/logo.png");
 
         const newItem = new BorrowItem({
             id: nextId,
@@ -74,7 +95,7 @@ app.post('/api/items', async (req, res) => {
             description: req.body.description,
             price: req.body.price,
             timeUnit: req.body.timeUnit,
-            image: req.body.image || "../assets/images/logo.png", // Accept image from frontend or fallback
+            image: imageUrl, // Uses Cloudinary URL if uploaded
             category: req.body.category || "Other", // Accept category from frontend
             status: "Available",
             owner: req.body.owner || "You (Current User)" // Accept owner from frontend or fallback
@@ -792,6 +813,15 @@ app.patch('/api/notifications/read-all', requireAuth, async (req, res) => {
         res.json({ message: 'All notifications marked as read' });
     } catch (err) {
         res.status(500).json({ message: 'Error updating notifications' });
+    }
+});
+
+app.delete('/api/notifications', requireAuth, async (req, res) => {
+    try {
+        await Notification.deleteMany({ userId: req.user.id });
+        res.json({ message: 'All notifications cleared' });
+    } catch (err) {
+        res.status(500).json({ message: 'Error clearing notifications' });
     }
 });
 
