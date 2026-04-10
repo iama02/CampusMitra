@@ -11,6 +11,9 @@ const jwt = require('jsonwebtoken');
 const LostFoundItem = require('./models/lostFoundItem');
 const Review = require('./models/review');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
+const Notification = require('./models/notification');
+const crypto = require('crypto');
+const nodemailer = require('nodemailer');
 
 const app = express();
 const PORT = 3000;
@@ -72,7 +75,7 @@ app.post('/api/items', async (req, res) => {
             price: req.body.price,
             timeUnit: req.body.timeUnit,
             image: req.body.image || "../assets/images/logo.png", // Accept image from frontend or fallback
-            category: "General", // Default string
+            category: req.body.category || "Other", // Accept category from frontend
             status: "Available",
             owner: req.body.owner || "You (Current User)" // Accept owner from frontend or fallback
         });
@@ -84,13 +87,28 @@ app.post('/api/items', async (req, res) => {
     }
 });
 
-// 3. Delete an item (DELETE)
-app.delete('/api/items/:id', async (req, res) => {
+// 3. Delete an item (DELETE - Protected)
+app.delete('/api/items/:id', requireAuth, async (req, res) => {
     try {
-        const deletedItem = await BorrowItem.findOneAndDelete({ id: req.params.id });
-        if (!deletedItem) {
+        const item = await BorrowItem.findOne({ id: req.params.id });
+        if (!item) {
             return res.status(404).json({ message: "Item not found" });
         }
+
+        // Verify ownership
+        if (item.owner !== req.user.name) {
+            return res.status(403).json({ message: "Unauthorized: You do not own this item" });
+        }
+
+        // Safeguard: Do not allow deletion if the item is currently lent out
+        if (item.status === 'In Use' || item.status === 'Reserved') {
+            return res.status(400).json({ message: "Cannot delete item while it is 'In Use' or 'Reserved'. Please wait for its return." });
+        }
+
+        // Optional: Remove any orphaned borrow requests to keep databases clean
+        await BorrowRequest.deleteMany({ itemId: item.id });
+
+        await BorrowItem.findOneAndDelete({ id: req.params.id });
         res.json({ message: "Item deleted successfully" });
     } catch (err) {
         res.status(500).json({ message: "Error deleting item", error: err.message });
@@ -148,6 +166,91 @@ app.post('/api/auth/login', async (req, res) => {
         });
     } catch (err) {
         res.status(500).json({ message: 'Error during login', error: err.message });
+    }
+});
+
+// Forgot Password
+app.post('/api/auth/forgot-password', async (req, res) => {
+    try {
+        const { email } = req.body;
+        const user = await User.findOne({ email });
+        if (!user) return res.status(404).json({ message: 'No account found with that email' });
+
+        const resetToken = crypto.randomBytes(32).toString('hex');
+        
+        // Hash token for database storage
+        user.resetPasswordToken = crypto.createHash('sha256').update(resetToken).digest('hex');
+        user.resetPasswordExpires = Date.now() + 15 * 60 * 1000; // 15 mins
+        await user.save();
+
+        const resetUrl = `http://localhost:3000/pages/auth.html?reset_token=${resetToken}`;
+
+        // SIMULATED EMAIL - print to terminal
+        console.log('\n==================================================');
+        console.log('🔔 SIMULATED EMAIL: PASSWORD RESET REQUEST');
+        console.log(`To: ${user.email}`);
+        console.log(`Link: ${resetUrl}`);
+        console.log('==================================================\n');
+
+        res.json({ message: 'Password reset link simulated! Check server terminal.' });
+    } catch (err) {
+        res.status(500).json({ message: 'Error generating reset capability', error: err.message });
+    }
+});
+
+// Reset Password
+app.post('/api/auth/reset-password/:token', async (req, res) => {
+    try {
+        const { password } = req.body;
+        
+        // Hash the incoming plaintext token to match what's stored in DB
+        const hashedToken = crypto.createHash('sha256').update(req.params.token).digest('hex');
+
+        const user = await User.findOne({
+            resetPasswordToken: hashedToken,
+            resetPasswordExpires: { $gt: Date.now() }
+        });
+
+        if (!user) return res.status(400).json({ message: 'Invalid or expired reset token' });
+
+        // Update password (pre-save hook will hash it)
+        user.password = password;
+        user.resetPasswordToken = undefined;
+        user.resetPasswordExpires = undefined;
+        await user.save();
+
+        res.json({ message: 'Password reset successful! You can now log in.' });
+    } catch (err) {
+        res.status(500).json({ message: 'Error resetting password', error: err.message });
+    }
+});
+
+// Update User Profile (e.g., WhatsApp Number)
+app.patch('/api/users/me', requireAuth, async (req, res) => {
+    try {
+        const { whatsappNumber } = req.body;
+        const user = await User.findById(req.user.id);
+        if (!user) return res.status(404).json({ message: 'User not found' });
+
+        if (whatsappNumber !== undefined) {
+            user.whatsappNumber = whatsappNumber;
+        }
+        await user.save();
+
+        // Generate a fresh JWT Token with updated payload
+        const token = jwt.sign(
+            { id: user._id, name: user.name, email: user.email, whatsappNumber: user.whatsappNumber },
+            getJwtSecret(),
+            { expiresIn: '7d' }
+        );
+
+        res.json({
+            message: 'Profile updated successfully!',
+            token,
+            user: { id: user._id, name: user.name, email: user.email, whatsappNumber: user.whatsappNumber }
+        });
+    } catch (err) {
+        res.status(500).json({ message: 'Error updating profile', error: err.message });
     }
 });
 
@@ -272,6 +375,16 @@ app.post('/api/tutors/:id/request', requireAuth, async (req, res) => {
         });
 
         await request.save();
+
+        // Notify Tutor
+        await new Notification({
+            userId: tutor.ownerId,
+            title: 'New Session Request',
+            message: `${req.user.name} has requested a tutoring session with you.`,
+            type: 'info',
+            link: '/pages/tuition.html'
+        }).save();
+
         res.status(201).json({ message: `Session request sent successfully to ${tutor.name}.` });
     } catch (err) {
         if (err.code === 11000) {
@@ -367,6 +480,15 @@ app.patch('/api/tutors/requests/:id/status', requireAuth, async (req, res) => {
         request.status = status;
         await request.save();
 
+        // Notify Student
+        await new Notification({
+            userId: request.studentId,
+            title: `Session ${status}`,
+            message: `${tutorProfile.name} has ${status.toLowerCase()} your session request.`,
+            type: status === 'Accepted' ? 'success' : 'warning',
+            link: '/pages/tuition.html'
+        }).save();
+
         res.json({ message: `Request successfully ${status.toLowerCase()}`, request });
     } catch (err) {
         res.status(500).json({ message: 'Error updating request status', error: err.message });
@@ -395,6 +517,18 @@ app.post('/api/items/:id/request', requireAuth, async (req, res) => {
         });
 
         await request.save();
+
+        const itemOwner = await User.findOne({ name: item.owner });
+        if (itemOwner) {
+            await new Notification({
+                userId: itemOwner._id,
+                title: 'New Borrow Request',
+                message: `${req.user.name} has requested to borrow your item: ${item.name}.`,
+                type: 'info',
+                link: '/pages/borrow.html'
+            }).save();
+        }
+
         res.status(201).json({ message: 'Borrow request sent successfully' });
     } catch (err) {
         if (err.code === 11000) return res.status(400).json({ message: 'You have already requested this item' });
@@ -453,6 +587,10 @@ app.patch('/api/items/requests/:id/status', requireAuth, async (req, res) => {
         request.status = status;
         
         if (status === 'Accepted') {
+            const item = await BorrowItem.findOne({ id: request.itemId });
+            if (item && item.status !== 'Available') {
+                return res.status(400).json({ message: 'Item is no longer available. You cannot accept this request.' });
+            }
             request.handoverOTP = Math.floor(1000 + Math.random() * 9000).toString();
             request.returnOTP = Math.floor(1000 + Math.random() * 9000).toString();
             await BorrowItem.findOneAndUpdate({ id: request.itemId }, { status: 'Reserved' });
@@ -461,6 +599,17 @@ app.patch('/api/items/requests/:id/status', requireAuth, async (req, res) => {
         }
 
         await request.save();
+
+        const requester = await User.findById(request.requesterId);
+        if (requester) {
+            await new Notification({
+                userId: requester._id,
+                title: `Borrow Request ${status}`,
+                message: `Your request to borrow ${request.itemName} was ${status.toLowerCase()}.`,
+                type: status === 'Accepted' ? 'success' : 'warning',
+                link: '/pages/borrow.html'
+            }).save();
+        }
 
         res.json({ message: `Request successfully ${status.toLowerCase()}`, request });
     } catch (err) {
@@ -575,7 +724,11 @@ Return EXACTLY valid JSON array. Do not include markdown \`\`\`json.
                     }
                 }
             } catch (aiErr) {
-                console.error("AI Match Error:", aiErr);
+                if (aiErr.status === 503 || (aiErr.message && aiErr.message.includes('503'))) {
+                    console.warn("⚠️ AI Match skipped: Gemini API is experiencing high demand (503 Service Unavailable).");
+                } else {
+                    console.error("⚠️ AI Match Error (Non-Fatal):", aiErr.message || aiErr);
+                }
             }
         }
         
@@ -602,6 +755,43 @@ app.delete('/api/lostfound/:id', requireAuth, async (req, res) => {
     } catch (err) {
         console.error(err);
         res.status(500).json({ message: 'Failed to delete item' });
+    }
+});
+
+// --- NOTIFICATIONS ENDPOINTS ---
+
+app.get('/api/notifications', requireAuth, async (req, res) => {
+    try {
+        const notifications = await Notification.find({ userId: req.user.id }).sort({ createdAt: -1 }).limit(20);
+        res.json(notifications);
+    } catch (err) {
+        res.status(500).json({ message: 'Error fetching notifications', error: err.message });
+    }
+});
+
+app.patch('/api/notifications/:id/read', requireAuth, async (req, res) => {
+    try {
+        const notification = await Notification.findById(req.params.id);
+        if (!notification) return res.status(404).json({ message: 'Notification not found' });
+        
+        if (notification.userId.toString() !== req.user.id) {
+            return res.status(403).json({ message: 'Unauthorized' });
+        }
+        
+        notification.isRead = true;
+        await notification.save();
+        res.json({ message: 'Marked as read', notification });
+    } catch (err) {
+        res.status(500).json({ message: 'Error updating notification status' });
+    }
+});
+
+app.patch('/api/notifications/read-all', requireAuth, async (req, res) => {
+    try {
+        await Notification.updateMany({ userId: req.user.id, isRead: false }, { isRead: true });
+        res.json({ message: 'All notifications marked as read' });
+    } catch (err) {
+        res.status(500).json({ message: 'Error updating notifications' });
     }
 });
 

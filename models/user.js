@@ -45,7 +45,9 @@ const userSchema = new mongoose.Schema({
     ratingCount: {
         type: Number,
         default: 0
-    }
+    },
+    resetPasswordToken: String,
+    resetPasswordExpires: Date
 }, { timestamps: true });
 
 // Hash password before saving to the database

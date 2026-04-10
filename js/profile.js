@@ -1,3 +1,29 @@
+const tabsState = {
+    incomingTutor: 'active',
+    outgoingTutor: 'active',
+    incomingBorrow: 'active',
+    outgoingBorrow: 'active'
+};
+
+window.setTab = function(type, tabName) {
+    tabsState[type] = tabName;
+    const activeBtn = document.getElementById(`tab-${type}-active`);
+    const historyBtn = document.getElementById(`tab-${type}-history`);
+    if(activeBtn && historyBtn) {
+        if(tabName === 'active') {
+            activeBtn.className = "px-3 py-1 text-xs font-bold rounded-md bg-white shadow-sm text-gray-900";
+            historyBtn.className = "px-3 py-1 text-xs font-bold rounded-md text-gray-500 hover:text-gray-900";
+        } else {
+            historyBtn.className = "px-3 py-1 text-xs font-bold rounded-md bg-white shadow-sm text-gray-900";
+            activeBtn.className = "px-3 py-1 text-xs font-bold rounded-md text-gray-500 hover:text-gray-900";
+        }
+    }
+    if(type === 'incomingTutor') fetchIncomingRequests();
+    if(type === 'outgoingTutor') fetchOutgoingRequests();
+    if(type === 'incomingBorrow') fetchIncomingBorrowRequests();
+    if(type === 'outgoingBorrow') fetchOutgoingBorrowRequests();
+};
+
 document.addEventListener('DOMContentLoaded', async () => {
     const userJson = localStorage.getItem('user');
     if (!userJson) {
@@ -50,7 +76,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                                     <span class="text-sm font-extrabold text-primary">&#8377;${item.price}<span class="text-xs text-gray-500 font-medium">/${item.timeUnit}</span></span>
                                 </div>
                             </div>
-                            <button onclick="window.location.href='borrow.html'" class="px-4 py-2 text-sm font-bold text-gray-500 bg-white border border-gray-200 rounded-lg hover:text-primary hover:border-primary transition-colors hidden sm:block">View In Store</button>
+                            <div class="flex gap-2">
+                                <button onclick="window.location.href='borrow.html'" class="px-4 py-2 text-sm font-bold text-gray-500 bg-white border border-gray-200 rounded-lg hover:text-primary hover:border-primary transition-colors hidden sm:block">View In Store</button>
+                                ${item.status === 'Available' ? 
+                                    `<button onclick="deleteListedItem('${item.id}')" title="Delete Item" class="px-3 py-2 text-sm font-bold text-red-500 bg-red-50 border border-red-100 rounded-lg hover:bg-red-500 hover:text-white transition-colors hidden sm:flex items-center justify-center">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                    </button>` 
+                                : ''}
+                            </div>
                         </div>
                     `;
                 });
@@ -101,7 +134,14 @@ async function fetchIncomingRequests() {
         
         if (!response.ok) throw new Error('Failed to fetch incoming requests');
         
-        const requests = await response.json();
+        let requests = await response.json();
+        
+        if(tabsState.incomingTutor === 'active') {
+            requests = requests.filter(r => r.status === 'Pending' || r.status === 'Accepted');
+        } else {
+            requests = requests.filter(r => r.status === 'Declined');
+        }
+
         if (requests.length === 0) {
             listContainer.innerHTML = `<div class="text-center py-8 text-gray-400 font-medium text-sm">No incoming requests.</div>`;
             return;
@@ -117,7 +157,11 @@ async function fetchIncomingRequests() {
                     <button onclick="updateRequestStatus('${req._id}', 'Accepted')" class="px-3 py-1.5 text-xs font-bold text-white bg-success hover:bg-emerald-600 rounded-lg transition-colors">Accept</button>
                     <button onclick="updateRequestStatus('${req._id}', 'Declined')" class="px-3 py-1.5 text-xs font-bold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">Decline</button>
                 </div>
-            ` : '';
+            ` : (req.status === 'Declined' ? `
+                <div class="flex gap-2 mt-3">
+                    <button onclick="updateRequestStatus('${req._id}', 'Accepted')" class="px-3 py-1.5 text-xs font-bold text-white bg-gray-400 hover:bg-success rounded-lg transition-colors">Accept Instead</button>
+                </div>
+            ` : '');
 
             let whatsappBtn = req.requesterWhatsapp ? `
                 <a href="https://wa.me/91${req.requesterWhatsapp}?text=Hi!%20I%20am%20reaching%20out%20from%20CampusMitra%20regarding%20your%20tutoring%20request." target="_blank" class="mt-2 inline-flex items-center justify-center gap-1.5 w-full px-3 py-1.5 bg-[#25D366] hover:bg-[#128C7E] text-white text-xs font-bold rounded-lg transition-colors">
@@ -157,7 +201,14 @@ async function fetchOutgoingRequests() {
         
         if (!response.ok) throw new Error('Failed to fetch outgoing requests');
         
-        const requests = await response.json();
+        let requests = await response.json();
+        
+        if(tabsState.outgoingTutor === 'active') {
+            requests = requests.filter(r => r.status === 'Pending' || r.status === 'Accepted');
+        } else {
+            requests = requests.filter(r => r.status === 'Declined');
+        }
+
         if (requests.length === 0) {
             listContainer.innerHTML = `<div class="text-center py-8 text-gray-400 font-medium text-sm">You haven't requested any sessions yet.</div>`;
             return;
@@ -205,7 +256,14 @@ async function fetchIncomingBorrowRequests() {
         });
         if (!response.ok) throw new Error('Failed to fetch incoming borrow requests');
         
-        const requests = await response.json();
+        let requests = await response.json();
+        
+        if(tabsState.incomingBorrow === 'active') {
+            requests = requests.filter(r => r.status === 'Pending' || r.status === 'Accepted' || r.status === 'In Use');
+        } else {
+            requests = requests.filter(r => r.status === 'Declined' || r.status === 'Returned');
+        }
+
         if (requests.length === 0) {
             listContainer.innerHTML = `<div class="text-center py-8 text-gray-400 font-medium text-sm">No incoming item requests.</div>`;
             return;
@@ -232,7 +290,11 @@ async function fetchIncomingBorrowRequests() {
                     <p class="text-xl font-black text-gray-900 tracking-widest">${req.returnOTP || '----'}</p>
                     <p class="text-xs text-gray-500 font-medium mt-1">Show this code when Borrower returns the item</p>
                 </div>
-            ` : ''));
+            ` : (req.status === 'Declined' ? `
+                <div class="flex gap-2 mt-3">
+                    <button onclick="updateBorrowRequestStatus('${req._id}', 'Accepted')" class="px-3 py-1.5 text-xs font-bold text-white bg-gray-400 hover:bg-success rounded-lg transition-colors">Accept Instead</button>
+                </div>
+            ` : '')));
 
             let whatsappBtn = req.requesterWhatsapp ? `
                 <a href="https://wa.me/91${req.requesterWhatsapp}?text=Hi!%20I%20am%20reaching%20out%20from%20CampusMitra%20regarding%20your%20request%20to%20borrow%20${encodeURIComponent(req.itemName)}." target="_blank" class="mt-2 inline-flex items-center justify-center gap-1.5 w-full px-3 py-1.5 bg-[#25D366] hover:bg-[#128C7E] text-white text-xs font-bold rounded-lg transition-colors">
@@ -274,7 +336,14 @@ async function fetchOutgoingBorrowRequests() {
         });
         if (!response.ok) throw new Error('Failed to fetch outgoing borrow requests');
         
-        const requests = await response.json();
+        let requests = await response.json();
+        
+        if(tabsState.outgoingBorrow === 'active') {
+            requests = requests.filter(r => r.status === 'Pending' || r.status === 'Accepted' || r.status === 'In Use');
+        } else {
+            requests = requests.filter(r => r.status === 'Declined' || r.status === 'Returned');
+        }
+
         if (requests.length === 0) {
             listContainer.innerHTML = `<div class="text-center py-8 text-gray-400 font-medium text-sm">You haven't requested any items.</div>`;
             return;
@@ -324,6 +393,30 @@ async function fetchOutgoingBorrowRequests() {
     } catch (err) {
         console.error(err);
         listContainer.innerHTML = `<div class="text-center py-8 text-red-400 font-medium text-sm">Could not load requests.</div>`;
+    }
+}
+
+window.deleteListedItem = async function(itemId) {
+    if(!confirm("Are you sure you want to permanently delete this item? Anyone who has requested it will also lose access.")) return;
+    try {
+        const response = await fetch(`http://localhost:3000/api/items/${itemId}`, {
+            method: 'DELETE',
+            headers: { 
+                Authorization: `Bearer ${localStorage.getItem('token')}`
+            }
+        });
+        
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.message || 'Failed to delete item');
+        
+        showSuccessModal(data.message);
+        
+        // Refresh the page or trigger a re-fetch of user items
+        setTimeout(() => window.location.reload(), 1500);
+        
+    } catch (err) {
+        console.error(err);
+        alert(err.message);
     }
 }
 
@@ -379,6 +472,13 @@ window.updateRequestStatus = async function(requestId, status) {
 };
 
 window.openSettings = function() {
+    const userJson = localStorage.getItem('user');
+    if (userJson) {
+        const user = JSON.parse(userJson);
+        const waInput = document.getElementById('editWhatsapp');
+        if(waInput) waInput.value = user.whatsappNumber || '';
+    }
+
     const modal = document.getElementById('settingsModal');
     const backdrop = document.getElementById('settingsBackdrop');
     const content = document.getElementById('settingsContent');
@@ -392,6 +492,35 @@ window.openSettings = function() {
         content.classList.remove('scale-95', 'opacity-0');
         content.classList.add('scale-100', 'opacity-100');
     }, 10);
+};
+
+window.saveProfile = async function() {
+    const waInput = document.getElementById('editWhatsapp');
+    if(!waInput) return;
+
+    try {
+        const response = await fetch('http://localhost:3000/api/users/me', {
+            method: 'PATCH',
+            headers: { 
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${localStorage.getItem('token')}`
+            },
+            body: JSON.stringify({ whatsappNumber: waInput.value.trim() })
+        });
+        
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.message || 'Failed to edit profile');
+        
+        // Dynamically update localStorage so no logout is needed!
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
+        
+        closeSettings();
+        showSuccessModal(data.message);
+    } catch(err) {
+        console.error(err);
+        alert(err.message);
+    }
 };
 
 window.closeSettings = function() {

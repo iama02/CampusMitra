@@ -1,8 +1,25 @@
+document.addEventListener('DOMContentLoaded', () => {
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get('reset_token');
+    if (token) {
+        document.getElementById('loginForm')?.classList.add('hidden');
+        document.getElementById('registerForm')?.classList.add('hidden');
+        document.getElementById('resetPasswordForm')?.classList.remove('hidden');
+        // Hide the toggle buttons entirely to force user to handle reset
+        document.querySelector('.bg-slate-100')?.classList.add('hidden');
+    }
+});
+
 function switchTab(tab) {
     const loginForm = document.getElementById('loginForm');
     const registerForm = document.getElementById('registerForm');
+    const forgotForm = document.getElementById('forgotPasswordForm');
+    const resetForm = document.getElementById('resetPasswordForm');
     const toggleLoginBtn = document.getElementById('toggleLoginBtn');
     const toggleRegisterBtn = document.getElementById('toggleRegisterBtn');
+
+    if (forgotForm) forgotForm.classList.add('hidden');
+    if (resetForm) resetForm.classList.add('hidden');
 
     if (tab === 'login') {
         // Show Login Form
@@ -224,5 +241,103 @@ function showToast(title, message) {
             toast.classList.remove('translate-y-0', 'opacity-100');
             toast.classList.add('translate-y-20', 'opacity-0', 'pointer-events-none');
         }, 3000);
+    }
+}
+
+function showForgotPassword(e) {
+    if(e) e.preventDefault();
+    document.getElementById('loginForm').classList.add('hidden');
+    document.getElementById('registerForm').classList.add('hidden');
+    document.getElementById('resetPasswordForm').classList.add('hidden');
+    document.getElementById('forgotPasswordForm').classList.remove('hidden');
+    document.querySelector('.bg-slate-100')?.classList.add('hidden'); // Hide toggles
+}
+
+async function handleForgotPassword(e) {
+    e.preventDefault();
+    const email = document.getElementById('forgotEmail').value.trim();
+    if(!email) return;
+
+    const btn = document.getElementById('btnForgot');
+    const originalText = btn.textContent;
+    btn.textContent = "Sending...";
+    btn.disabled = true;
+
+    try {
+        const response = await fetch('http://localhost:3000/api/auth/forgot-password', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email })
+        });
+        const data = await response.json();
+        
+        btn.textContent = originalText;
+        btn.disabled = false;
+
+        if (response.ok) {
+            showToast('Reset Link Generated!', 'Check your server terminal to click the simulated email link.');
+            setTimeout(() => {
+                // Reveal the UI again for when they click the token
+                // Actually they will open a new tab from the terminal, so we can just leave it
+            }, 3000);
+        } else {
+            alert(data.message || 'Failed to send reset link');
+        }
+    } catch (err) {
+        btn.textContent = originalText;
+        btn.disabled = false;
+        console.error(err);
+        alert('Server error. Please try again.');
+    }
+}
+
+async function handleResetPassword(e) {
+    e.preventDefault();
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get('reset_token');
+    
+    if(!token) {
+        alert("Invalid or missing reset token.");
+        return;
+    }
+
+    const password = document.getElementById('resetPassword').value;
+    if(password.length < 6) {
+        alert("Password must be at least 6 characters.");
+        return;
+    }
+
+    const btn = document.getElementById('btnReset');
+    const originalText = btn.textContent;
+    btn.textContent = "Resetting...";
+    btn.disabled = true;
+
+    try {
+        const response = await fetch(`http://localhost:3000/api/auth/reset-password/${token}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ password })
+        });
+        const data = await response.json();
+        
+        btn.textContent = originalText;
+        btn.disabled = false;
+
+        if (response.ok) {
+            showToast('Password Reset!', 'You can now log in with your new password.');
+            setTimeout(() => {
+                // Remove token from URL and switch to login
+                window.history.replaceState({}, document.title, window.location.pathname);
+                document.querySelector('.bg-slate-100')?.classList.remove('hidden');
+                switchTab('login');
+            }, 2500);
+        } else {
+            alert(data.message || 'Failed to reset password. Token might be expired.');
+        }
+    } catch (err) {
+        btn.textContent = originalText;
+        btn.disabled = false;
+        console.error(err);
+        alert('Server error. Please try again.');
     }
 }

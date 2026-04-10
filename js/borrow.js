@@ -142,6 +142,7 @@ window.handleListSubmit = async function (event) {
     const description = document.getElementById('itemDesc').value;
     const price = document.getElementById('itemPrice').value;
     const timeUnit = document.getElementById('itemTimeUnit').value;
+    const category = document.getElementById('itemCategory') ? document.getElementById('itemCategory').value : 'General';
     const imageInput = document.getElementById('itemImage');
 
     let base64Image = "../assets/images/logo.png"; // Fallback placeholder
@@ -164,6 +165,7 @@ window.handleListSubmit = async function (event) {
         description,
         price,
         timeUnit,
+        category,
         image: base64Image,
         owner: currentOwner
     };
