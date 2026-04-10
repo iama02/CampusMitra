@@ -61,6 +61,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 `;
             }
         }
+
+        const getStartedBtn = document.getElementById('getStartedBtn');
+        if (getStartedBtn) {
+            getStartedBtn.innerText = "Go to Dashboard";
+            getStartedBtn.href = pagesPath + "profile.html";
+        }
     }
 });
 
