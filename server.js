@@ -206,14 +206,37 @@ app.post('/api/auth/forgot-password', async (req, res) => {
 
         const resetUrl = `${req.protocol}://${req.get('host')}/pages/auth.html?reset_token=${resetToken}`;
 
-        // SIMULATED EMAIL - print to terminal
-        console.log('\n==================================================');
-        console.log('🔔 SIMULATED EMAIL: PASSWORD RESET REQUEST');
-        console.log(`To: ${user.email}`);
-        console.log(`Link: ${resetUrl}`);
-        console.log('==================================================\n');
+        // Send email using nodemailer
+        const transporter = nodemailer.createTransport({
+            service: 'gmail', 
+            auth: {
+                user: process.env.EMAIL_USER,
+                pass: process.env.EMAIL_PASS
+            }
+        });
 
-        res.json({ message: 'Password reset link simulated! Check server terminal.' });
+        const mailOptions = {
+            from: process.env.EMAIL_USER,
+            to: user.email,
+            subject: 'CampusMitra - Password Reset Request',
+            html: `
+                <div style="font-family: Arial, sans-serif; pColor: #333; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px;">
+                    <h2 style="color: #2563eb; text-align: center;">CampusMitra Password Reset</h2>
+                    <p style="font-size: 16px;">Hello,</p>
+                    <p style="font-size: 16px;">We received a request to reset your password. Click the button below to set a new password:</p>
+                    <div style="text-align: center; margin: 30px 0;">
+                        <a href="${resetUrl}" style="background-color: #2563eb; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 16px;">Reset Password</a>
+                    </div>
+                    <p style="font-size: 14px; color: #555;">This link will expire in 15 minutes.</p>
+                    <p style="font-size: 14px; color: #555;">If you did not request this, please ignore this email and your password will remain unchanged.</p>
+                </div>
+            `
+        };
+
+        await transporter.sendMail(mailOptions);
+        console.log(`Password reset link sent to: ${user.email}`);
+
+        res.json({ message: 'Password reset link has been sent to your email.' });
     } catch (err) {
         res.status(500).json({ message: 'Error generating reset capability', error: err.message });
     }

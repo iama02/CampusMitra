@@ -275,7 +275,7 @@ async function handleForgotPassword(e) {
         btn.disabled = false;
 
         if (response.ok) {
-            showToast('Reset Link Generated!', 'Check your server terminal to click the simulated email link.');
+            showToast('Reset Link Sent!', 'Please check your email to reset your password.');
             setTimeout(() => {
                 // Reveal the UI again for when they click the token
                 // Actually they will open a new tab from the terminal, so we can just leave it
@@ -339,5 +339,16 @@ async function handleResetPassword(e) {
         btn.disabled = false;
         console.error(err);
         alert('Server error. Please try again.');
+    }
+}
+
+function togglePasswordVisibility(inputId) {
+    const input = document.getElementById(inputId);
+    if (!input) return;
+    
+    if (input.type === 'password') {
+        input.type = 'text';
+    } else {
+        input.type = 'password';
     }
 }
