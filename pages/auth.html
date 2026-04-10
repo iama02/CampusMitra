@@ -118,7 +118,9 @@
                                 class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all placeholder-gray-400 bg-gray-50/50 focus:bg-white"
                                 placeholder="••••••••">
                             <div class="flex justify-end mt-2">
-                                <a href="#" onclick="showForgotPassword(event)" class="text-sm font-semibold text-primary hover:text-secondary transition-colors">Forgot Password?</a>
+                                <a href="#" onclick="showForgotPassword(event)"
+                                    class="text-sm font-semibold text-primary hover:text-secondary transition-colors">Forgot
+                                    Password?</a>
                             </div>
                             <p id="loginPasswordError" class="text-danger text-xs mt-1.5 hidden font-medium"></p>
                         </div>
@@ -153,7 +155,7 @@
                             <label class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
                             <input type="text" id="regName"
                                 class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all placeholder-gray-400 bg-gray-50/50 focus:bg-white"
-                                placeholder="Akshaya">
+                                placeholder="Eg:K.Soukyamini">
                             <p id="regNameError" class="text-danger text-xs mt-1 hidden"></p>
                         </div>
 
@@ -206,7 +208,7 @@
                         </div>
 
                         <div class="form-group">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">WhatsApp Number (Optional)</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">WhatsApp Number</label>
                             <input type="tel" id="regWhatsapp"
                                 class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all placeholder-gray-400 bg-gray-50/50 focus:bg-white"
                                 placeholder="e.g. 9876543210">
@@ -239,51 +241,52 @@
 
             </div>
 
-                <!-- Forgot Password Form -->
-                <form id="forgotPasswordForm" class="w-full fade-in pb-4 hidden" onsubmit="handleForgotPassword(event)">
-                    <div class="mb-6 text-center">
-                        <h3 class="text-2xl font-bold text-textdark">Forgot Password</h3>
-                        <p class="text-gray-500 text-sm mt-1">Enter your email and we'll send a reset link.</p>
+            <!-- Forgot Password Form -->
+            <form id="forgotPasswordForm" class="w-full fade-in pb-4 hidden" onsubmit="handleForgotPassword(event)">
+                <div class="mb-6 text-center">
+                    <h3 class="text-2xl font-bold text-textdark">Forgot Password</h3>
+                    <p class="text-gray-500 text-sm mt-1">Enter your email and we'll send a reset link.</p>
+                </div>
+                <div class="space-y-4 max-w-sm mx-auto">
+                    <div class="form-group">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">College Email</label>
+                        <input type="email" id="forgotEmail" required
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all placeholder-gray-400 bg-gray-50/50 focus:bg-white"
+                            placeholder="user@college.ac.in">
                     </div>
-                    <div class="space-y-4 max-w-sm mx-auto">
-                        <div class="form-group">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">College Email</label>
-                            <input type="email" id="forgotEmail" required
-                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all placeholder-gray-400 bg-gray-50/50 focus:bg-white"
-                                placeholder="user@college.ac.in">
-                        </div>
-                        <button type="submit" id="btnForgot"
-                            class="w-full bg-primary hover:bg-secondary text-white font-semibold py-3 px-4 rounded-lg shadow mt-2 transition-all">
-                            Send Reset Link
-                        </button>
-                        <div class="text-center mt-4">
-                            <a href="#" onclick="switchTab('login')" class="text-sm font-semibold text-gray-500 hover:text-textdark">Back to Login</a>
-                        </div>
+                    <button type="submit" id="btnForgot"
+                        class="w-full bg-primary hover:bg-secondary text-white font-semibold py-3 px-4 rounded-lg shadow mt-2 transition-all">
+                        Send Reset Link
+                    </button>
+                    <div class="text-center mt-4">
+                        <a href="#" onclick="switchTab('login')"
+                            class="text-sm font-semibold text-gray-500 hover:text-textdark">Back to Login</a>
                     </div>
-                </form>
+                </div>
+            </form>
 
-                <!-- Reset Password Form -->
-                <form id="resetPasswordForm" class="w-full fade-in pb-4 hidden" onsubmit="handleResetPassword(event)">
-                    <div class="mb-6 text-center">
-                        <h3 class="text-2xl font-bold text-textdark">Set New Password</h3>
-                        <p class="text-gray-500 text-sm mt-1">Please enter your new secure password.</p>
+            <!-- Reset Password Form -->
+            <form id="resetPasswordForm" class="w-full fade-in pb-4 hidden" onsubmit="handleResetPassword(event)">
+                <div class="mb-6 text-center">
+                    <h3 class="text-2xl font-bold text-textdark">Set New Password</h3>
+                    <p class="text-gray-500 text-sm mt-1">Please enter your new secure password.</p>
+                </div>
+                <div class="space-y-4 max-w-sm mx-auto">
+                    <div class="form-group">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">New Password</label>
+                        <input type="password" id="resetPassword" required minlength="6"
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all placeholder-gray-400 bg-gray-50/50 focus:bg-white"
+                            placeholder="••••••••">
                     </div>
-                    <div class="space-y-4 max-w-sm mx-auto">
-                        <div class="form-group">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">New Password</label>
-                            <input type="password" id="resetPassword" required minlength="6"
-                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all placeholder-gray-400 bg-gray-50/50 focus:bg-white"
-                                placeholder="••••••••">
-                        </div>
-                        <button type="submit" id="btnReset"
-                            class="w-full bg-primary hover:bg-secondary text-white font-semibold py-3 px-4 rounded-lg shadow mt-2 transition-all">
-                            Reset Password
-                        </button>
-                    </div>
-                </form>
+                    <button type="submit" id="btnReset"
+                        class="w-full bg-primary hover:bg-secondary text-white font-semibold py-3 px-4 rounded-lg shadow mt-2 transition-all">
+                        Reset Password
+                    </button>
+                </div>
+            </form>
 
-            </div>
         </div>
+    </div>
     </div>
 
     <!-- ===== SUCCESS TOAST ===== -->
