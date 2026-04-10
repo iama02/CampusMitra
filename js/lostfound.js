@@ -13,7 +13,7 @@ let cachedItems = [];
 
 async function initLfItems() {
     try {
-        const res = await fetch('http://localhost:3000/api/lostfound');
+        const res = await fetch('/api/lostfound');
         if (!res.ok) throw new Error('Failed to fetch items');
         cachedItems = await res.json();
     } catch (e) {
@@ -93,7 +93,7 @@ window.handleLfSubmit = async function(event) {
     const payload = { type, name, description, location };
 
     try {
-        const response = await fetch('http://localhost:3000/api/lostfound', {
+        const response = await fetch('/api/lostfound', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -196,7 +196,7 @@ window.closeMatchModal = function() {
 window.deleteLfItem = function(id) {
     showConfirm('Are you sure you want to mark this item as resolved? It will be permanently removed from the dashboard.', async () => {
         try {
-            const response = await fetch(`http://localhost:3000/api/lostfound/${id}`, {
+            const response = await fetch(`/api/lostfound/${id}`, {
                 method: 'DELETE',
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem('token')}`

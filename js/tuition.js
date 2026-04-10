@@ -1,4 +1,4 @@
-const TUTORS_API_URL = 'http://localhost:3000/api/tutors';
+const TUTORS_API_URL = '/api/tutors';
 
 const DEFAULT_TUTORS = [
     {

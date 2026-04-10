@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:3000/api/items';
+const API_URL = '/api/items';
 
 let allItems = [];
 
@@ -238,7 +238,7 @@ window.requestBorrow = async function(itemId, itemName, ownerName) {
     }
 
     try {
-        const response = await fetch(`http://localhost:3000/api/items/${itemId}/request`, {
+        const response = await fetch(`/api/items/${itemId}/request`, {
             method: 'POST',
             headers: { Authorization: `Bearer ${token}` }
         });

@@ -97,7 +97,7 @@ window.fetchNotifications = async function() {
     const token = localStorage.getItem('token');
     if (!token) return;
     try {
-        const res = await fetch('http://localhost:3000/api/notifications', {
+        const res = await fetch('/api/notifications', {
             headers: { 'Authorization': 'Bearer ' + token }
         });
         if (res.ok) {
@@ -156,7 +156,7 @@ function renderNotifications(notifs) {
 
 window.handleNotifClick = async function(id, link) {
     const token = localStorage.getItem('token');
-    await fetch('http://localhost:3000/api/notifications/' + id + '/read', {
+    await fetch('/api/notifications/' + id + '/read', {
         method: 'PATCH',
         headers: { 'Authorization': 'Bearer ' + token }
     });
@@ -170,7 +170,7 @@ window.handleNotifClick = async function(id, link) {
 window.markAllRead = async function() {
     const token = localStorage.getItem('token');
     if (!token) return;
-    await fetch('http://localhost:3000/api/notifications/read-all', {
+    await fetch('/api/notifications/read-all', {
         method: 'PATCH',
         headers: { 'Authorization': 'Bearer ' + token }
     });
@@ -181,7 +181,7 @@ window.clearAllNotifications = async function() {
     const token = localStorage.getItem('token');
     if (!token) return;
     if (!confirm("Are you sure you want to permanently delete all notifications?")) return;
-    await fetch('http://localhost:3000/api/notifications', {
+    await fetch('/api/notifications', {
         method: 'DELETE',
         headers: { 'Authorization': 'Bearer ' + token }
     });

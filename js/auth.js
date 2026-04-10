@@ -104,7 +104,7 @@ async function handleLogin(e) {
         btn.classList.add('opacity-75', 'cursor-not-allowed');
 
         try {
-            const response = await fetch('http://localhost:3000/api/auth/login', {
+            const response = await fetch('/api/auth/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, password })
@@ -199,7 +199,7 @@ async function handleRegister(e) {
         btn.classList.add('opacity-75', 'cursor-not-allowed');
 
         try {
-            const response = await fetch('http://localhost:3000/api/auth/register', {
+            const response = await fetch('/api/auth/register', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ name, rollNo, email, branch, year, password, whatsappNumber })
@@ -264,7 +264,7 @@ async function handleForgotPassword(e) {
     btn.disabled = true;
 
     try {
-        const response = await fetch('http://localhost:3000/api/auth/forgot-password', {
+        const response = await fetch('/api/auth/forgot-password', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email })
@@ -313,7 +313,7 @@ async function handleResetPassword(e) {
     btn.disabled = true;
 
     try {
-        const response = await fetch(`http://localhost:3000/api/auth/reset-password/${token}`, {
+        const response = await fetch(`/api/auth/reset-password/${token}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ password })

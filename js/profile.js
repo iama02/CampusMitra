@@ -41,7 +41,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Fetch user items from backend to populate "Items Listed"
     try {
-        const response = await fetch('http://localhost:3000/api/items');
+        const response = await fetch('/api/items');
         if (response.ok) {
             const allItems = await response.json();
 
@@ -95,7 +95,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     try {
-        const tutoringResponse = await fetch('http://localhost:3000/api/tutors/me/summary', {
+        const tutoringResponse = await fetch('/api/tutors/me/summary', {
             headers: {
                 Authorization: `Bearer ${localStorage.getItem('token')}`
             }
@@ -128,7 +128,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 async function fetchIncomingRequests() {
     const listContainer = document.getElementById('incomingRequestsList');
     try {
-        const response = await fetch('http://localhost:3000/api/tutors/requests/incoming', {
+        const response = await fetch('/api/tutors/requests/incoming', {
             headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
         });
         
@@ -195,7 +195,7 @@ async function fetchIncomingRequests() {
 async function fetchOutgoingRequests() {
     const listContainer = document.getElementById('outgoingRequestsList');
     try {
-        const response = await fetch('http://localhost:3000/api/tutors/requests/outgoing', {
+        const response = await fetch('/api/tutors/requests/outgoing', {
             headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
         });
         
@@ -251,7 +251,7 @@ async function fetchIncomingBorrowRequests() {
     if(!listContainer) return;
 
     try {
-        const response = await fetch('http://localhost:3000/api/items/requests/incoming', {
+        const response = await fetch('/api/items/requests/incoming', {
             headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
         });
         if (!response.ok) throw new Error('Failed to fetch incoming borrow requests');
@@ -331,7 +331,7 @@ async function fetchOutgoingBorrowRequests() {
     if(!listContainer) return;
 
     try {
-        const response = await fetch('http://localhost:3000/api/items/requests/outgoing', {
+        const response = await fetch('/api/items/requests/outgoing', {
             headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
         });
         if (!response.ok) throw new Error('Failed to fetch outgoing borrow requests');
@@ -399,7 +399,7 @@ async function fetchOutgoingBorrowRequests() {
 window.deleteListedItem = async function(itemId) {
     if(!confirm("Are you sure you want to permanently delete this item? Anyone who has requested it will also lose access.")) return;
     try {
-        const response = await fetch(`http://localhost:3000/api/items/${itemId}`, {
+        const response = await fetch(`/api/items/${itemId}`, {
             method: 'DELETE',
             headers: { 
                 Authorization: `Bearer ${localStorage.getItem('token')}`
@@ -422,7 +422,7 @@ window.deleteListedItem = async function(itemId) {
 
 window.updateBorrowRequestStatus = async function(requestId, status) {
     try {
-        const response = await fetch(`http://localhost:3000/api/items/requests/${requestId}/status`, {
+        const response = await fetch(`/api/items/requests/${requestId}/status`, {
             method: 'PATCH',
             headers: { 
                 'Content-Type': 'application/json',
@@ -442,7 +442,7 @@ window.updateBorrowRequestStatus = async function(requestId, status) {
 };
 window.updateRequestStatus = async function(requestId, status) {
     try {
-        const response = await fetch(`http://localhost:3000/api/tutors/requests/${requestId}/status`, {
+        const response = await fetch(`/api/tutors/requests/${requestId}/status`, {
             method: 'PATCH',
             headers: { 
                 'Content-Type': 'application/json',
@@ -457,7 +457,7 @@ window.updateRequestStatus = async function(requestId, status) {
         await fetchIncomingRequests();
         
         // Also refresh tutoring summary stats
-        const tutoringResponse = await fetch('http://localhost:3000/api/tutors/me/summary', {
+        const tutoringResponse = await fetch('/api/tutors/me/summary', {
             headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
         });
         if (tutoringResponse.ok) {
@@ -499,7 +499,7 @@ window.saveProfile = async function() {
     if(!waInput) return;
 
     try {
-        const response = await fetch('http://localhost:3000/api/users/me', {
+        const response = await fetch('/api/users/me', {
             method: 'PATCH',
             headers: { 
                 'Content-Type': 'application/json',
@@ -605,7 +605,7 @@ window.submitOtp = async function() {
     document.getElementById('otpErrorMsg').classList.add('hidden');
 
     try {
-        const response = await fetch(`http://localhost:3000/api/items/requests/${currentOtpRequestId}/verify-otp`, {
+        const response = await fetch(`/api/items/requests/${currentOtpRequestId}/verify-otp`, {
             method: 'POST',
             headers: { 
                 'Content-Type': 'application/json',
@@ -755,7 +755,7 @@ window.submitRating = async function() {
     btn.disabled = true;
 
     try {
-        const response = await fetch('http://localhost:3000/api/users/rate', {
+        const response = await fetch('/api/users/rate', {
             method: 'POST',
             headers: { 
                 'Content-Type': 'application/json',

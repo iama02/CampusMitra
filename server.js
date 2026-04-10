@@ -35,7 +35,7 @@ const storage = new CloudinaryStorage({
 const upload = multer({ storage: storage });
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 // Middleware
 app.use(cors()); // Allow requests from other origins (like our frontend)
@@ -204,7 +204,7 @@ app.post('/api/auth/forgot-password', async (req, res) => {
         user.resetPasswordExpires = Date.now() + 15 * 60 * 1000; // 15 mins
         await user.save();
 
-        const resetUrl = `http://localhost:3000/pages/auth.html?reset_token=${resetToken}`;
+        const resetUrl = `${req.protocol}://${req.get('host')}/pages/auth.html?reset_token=${resetToken}`;
 
         // SIMULATED EMAIL - print to terminal
         console.log('\n==================================================');
@@ -825,8 +825,13 @@ app.delete('/api/notifications', requireAuth, async (req, res) => {
     }
 });
 
-// Start the server
-app.listen(PORT, () => {
-    console.log(`Backend Server running on: http://localhost:${PORT}`);
-    console.log(`You can access the API at http://localhost:${PORT}/api/items`);
-});
+// Start the server (but do not bind port if we are running automated tests)
+if (require.main === module) {
+    app.listen(PORT, () => {
+        console.log(`Backend Server running on: http://localhost:${PORT}`);
+        console.log(`You can access the API at http://localhost:${PORT}/api/items`);
+    });
+}
+
+// Export module for Supertest integration testing
+module.exports = app;
