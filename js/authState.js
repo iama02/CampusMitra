@@ -160,17 +160,16 @@ function renderNotifications(notifs) {
     }
 }
 
-window.handleNotifClick = async function(id, link) {
+window.handleNotifClick = async function(id) {
     const token = localStorage.getItem('token');
     await fetch('/api/notifications/' + id + '/read', {
         method: 'PATCH',
         headers: { 'Authorization': 'Bearer ' + token }
     });
-    if (link && link !== '#') {
-        window.location.href = link;
-    } else {
-        window.fetchNotifications();
-    }
+    
+    // Unconditionally redirect to Dashboard
+    const isPagesDir = window.location.pathname.includes('/pages/') || window.location.pathname.includes('\\pages\\');
+    window.location.href = isPagesDir ? 'profile.html' : 'pages/profile.html';
 };
 
 window.markAllRead = async function() {
