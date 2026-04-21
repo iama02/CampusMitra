@@ -118,7 +118,7 @@ async function handleLogin(e) {
                 // Save token and user info
                 localStorage.setItem('token', data.token);
                 localStorage.setItem('user', JSON.stringify(data.user));
-                
+
                 // Redirect to home
                 window.location.href = '../index.html';
             } else {
@@ -245,7 +245,7 @@ function showToast(title, message) {
 }
 
 function showForgotPassword(e) {
-    if(e) e.preventDefault();
+    if (e) e.preventDefault();
     document.getElementById('loginForm').classList.add('hidden');
     document.getElementById('registerForm').classList.add('hidden');
     document.getElementById('resetPasswordForm').classList.add('hidden');
@@ -256,7 +256,7 @@ function showForgotPassword(e) {
 async function handleForgotPassword(e) {
     e.preventDefault();
     const email = document.getElementById('forgotEmail').value.trim();
-    if(!email) return;
+    if (!email) return;
 
     const btn = document.getElementById('btnForgot');
     const originalText = btn.textContent;
@@ -270,7 +270,7 @@ async function handleForgotPassword(e) {
             body: JSON.stringify({ email })
         });
         const data = await response.json();
-        
+
         btn.textContent = originalText;
         btn.disabled = false;
 
@@ -295,14 +295,14 @@ async function handleResetPassword(e) {
     e.preventDefault();
     const params = new URLSearchParams(window.location.search);
     const token = params.get('reset_token');
-    
-    if(!token) {
+
+    if (!token) {
         alert("Invalid or missing reset token.");
         return;
     }
 
     const password = document.getElementById('resetPassword').value;
-    if(password.length < 6) {
+    if (password.length < 6) {
         alert("Password must be at least 6 characters.");
         return;
     }
@@ -319,7 +319,7 @@ async function handleResetPassword(e) {
             body: JSON.stringify({ password })
         });
         const data = await response.json();
-        
+
         btn.textContent = originalText;
         btn.disabled = false;
 
@@ -345,7 +345,7 @@ async function handleResetPassword(e) {
 function togglePasswordVisibility(inputId) {
     const input = document.getElementById(inputId);
     if (!input) return;
-    
+
     if (input.type === 'password') {
         input.type = 'text';
     } else {
