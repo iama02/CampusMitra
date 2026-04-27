@@ -68,6 +68,45 @@ document.addEventListener('DOMContentLoaded', () => {
             getStartedBtn.href = pagesPath + "profile.html";
         }
     }
+
+    // ── Mobile menu toggle ────────────────────────────────────────────
+    const menuToggle = document.getElementById('menu-toggle');
+    // mobileMenu is already selected above: const mobileMenu = document.getElementById('mobile-menu');
+    
+    if (menuToggle && mobileMenu) {
+        const hamburgerLines = menuToggle.querySelectorAll('.hamburger-line');
+
+        menuToggle.addEventListener('click', () => {
+            const isOpen = !mobileMenu.classList.contains('hidden');
+
+            if (isOpen) {
+                mobileMenu.classList.add('hidden');
+                if (hamburgerLines.length === 3) {
+                    hamburgerLines[0].style.transform = 'none';
+                    hamburgerLines[1].style.opacity = '1';
+                    hamburgerLines[2].style.transform = 'none';
+                }
+            } else {
+                mobileMenu.classList.remove('hidden');
+                if (hamburgerLines.length === 3) {
+                    hamburgerLines[0].style.transform = 'translateY(8px) rotate(45deg)';
+                    hamburgerLines[1].style.opacity = '0';
+                    hamburgerLines[2].style.transform = 'translateY(-8px) rotate(-45deg)';
+                }
+            }
+        });
+
+        mobileMenu.querySelectorAll('a, button').forEach(link => {
+            link.addEventListener('click', () => {
+                mobileMenu.classList.add('hidden');
+                if (hamburgerLines.length === 3) {
+                    hamburgerLines[0].style.transform = 'none';
+                    hamburgerLines[1].style.opacity = '1';
+                    hamburgerLines[2].style.transform = 'none';
+                }
+            });
+        });
+    }
 });
 
 window.handleLogout = function() {
