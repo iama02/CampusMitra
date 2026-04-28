@@ -100,7 +100,7 @@ app.post('/api/items', upload.single('image'), async (req, res) => {
             status: "Available",
             owner: req.body.owner || "You (Current User)" // Accept owner from frontend or fallback
         });
-        
+
         await newItem.save();
         res.status(201).json({ message: "Item successfully added!", item: newItem });
     } catch (err) {
@@ -151,7 +151,7 @@ app.post('/api/auth/register', async (req, res) => {
 
         const newUser = new User({ name, rollNo, email, branch, year, password, whatsappNumber });
         await newUser.save();
-        
+
         res.status(201).json({ message: 'Registration successful! You can now log in.' });
     } catch (err) {
         res.status(500).json({ message: 'Error during registration', error: err.message });
@@ -163,7 +163,7 @@ app.post('/api/auth/login', async (req, res) => {
     try {
         const { email, password } = req.body;
 
-        const user = await User.findOne({ email });
+        const user = await User.findOne({ email: email.toLowerCase() });
         if (!user) {
             return res.status(400).json({ message: 'Invalid credentials' });
         }
@@ -198,7 +198,7 @@ app.post('/api/auth/forgot-password', async (req, res) => {
         if (!user) return res.status(404).json({ message: 'No account found with that email' });
 
         const resetToken = crypto.randomBytes(32).toString('hex');
-        
+
         // Hash token for database storage
         user.resetPasswordToken = crypto.createHash('sha256').update(resetToken).digest('hex');
         user.resetPasswordExpires = Date.now() + 15 * 60 * 1000; // 15 mins
@@ -208,7 +208,7 @@ app.post('/api/auth/forgot-password', async (req, res) => {
 
         // Send email using nodemailer
         const transporter = nodemailer.createTransport({
-            service: 'gmail', 
+            service: 'gmail',
             auth: {
                 user: process.env.EMAIL_USER,
                 pass: process.env.EMAIL_PASS
@@ -246,7 +246,7 @@ app.post('/api/auth/forgot-password', async (req, res) => {
 app.post('/api/auth/reset-password/:token', async (req, res) => {
     try {
         const { password } = req.body;
-        
+
         // Hash the incoming plaintext token to match what's stored in DB
         const hashedToken = crypto.createHash('sha256').update(req.params.token).digest('hex');
 
@@ -463,7 +463,7 @@ app.get('/api/tutors/requests/incoming', requireAuth, async (req, res) => {
     try {
         const tutorProfiles = await TutorProfile.find({ ownerId: req.user.id });
         const tutorIds = tutorProfiles.map(p => p._id);
-        
+
         const incomingRequests = await TutoringRequest.find({ tutorId: { $in: tutorIds } }).sort({ createdAt: -1 }).lean();
         for (let reqObj of incomingRequests) {
             const user = await User.findById(reqObj.studentId);
@@ -506,7 +506,7 @@ app.get('/api/tutors/requests/outgoing', requireAuth, async (req, res) => {
 app.patch('/api/tutors/requests/:id/status', requireAuth, async (req, res) => {
     try {
         const { status } = req.body;
-        
+
         if (!['Accepted', 'Declined'].includes(status)) {
             return res.status(400).json({ message: 'Invalid status. Must be Accepted or Declined.' });
         }
@@ -629,7 +629,7 @@ app.patch('/api/items/requests/:id/status', requireAuth, async (req, res) => {
         if (request.ownerName !== req.user.name) return res.status(403).json({ message: 'Unauthorized' });
 
         request.status = status;
-        
+
         if (status === 'Accepted') {
             const item = await BorrowItem.findOne({ id: request.itemId });
             if (item && item.status !== 'Available') {
@@ -671,14 +671,14 @@ app.post('/api/items/requests/:id/verify-otp', requireAuth, async (req, res) => 
         if (phase === 'handover') {
             if (request.ownerName !== req.user.name) return res.status(403).json({ message: 'Unauthorized' });
             if (request.handoverOTP !== otp) return res.status(400).json({ message: 'Invalid Pickup PIN. Please try again.' });
-            
+
             request.status = 'In Use';
-            request.handoverOTP = null; 
+            request.handoverOTP = null;
             await request.save();
             await BorrowItem.findOneAndUpdate({ id: request.itemId }, { status: 'In Use' });
-            
+
             return res.json({ message: 'Handover verified successfully!', request });
-            
+
         } else if (phase === 'return') {
             if (request.requesterId.toString() !== req.user.id.toString()) return res.status(403).json({ message: 'Unauthorized' });
             if (request.returnOTP !== otp) return res.status(400).json({ message: 'Invalid Return PIN. Please try again.' });
@@ -687,7 +687,7 @@ app.post('/api/items/requests/:id/verify-otp', requireAuth, async (req, res) => 
             request.returnOTP = null;
             await request.save();
             await BorrowItem.findOneAndUpdate({ id: request.itemId }, { status: 'Available' });
-            
+
             return res.json({ message: 'Return verified successfully! Item is available again.', request });
         } else {
             return res.status(400).json({ message: 'Invalid phase specified' });
@@ -713,7 +713,7 @@ app.get('/api/lostfound', async (req, res) => {
 app.post('/api/lostfound', requireAuth, async (req, res) => {
     try {
         const { type, name, description, location } = req.body;
-        
+
         const newItem = new LostFoundItem({
             type,
             name,
@@ -724,7 +724,7 @@ app.post('/api/lostfound', requireAuth, async (req, res) => {
             reporterEmail: req.user.email,
             reporterWhatsapp: req.user.whatsappNumber
         });
-        
+
         await newItem.save();
 
         // Perform AI match check against opposite type
@@ -734,8 +734,8 @@ app.post('/api/lostfound', requireAuth, async (req, res) => {
 
         if (searchItems.length > 0 && process.env.GEMINI_API_KEY) {
             const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-            const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
-            
+            const model = genAI.getGenerativeModel({ model: "gemini-flash-latest" });
+
             const prompt = `
 I have a newly reported ${type} item with these details:
 Name: ${name}
@@ -758,7 +758,7 @@ Return EXACTLY valid JSON array. Do not include markdown \`\`\`json.
                     responseText = responseText.replace(/^\`\`\`/, '').replace(/\`\`\`$/, '').trim();
                 }
                 const aiMatches = JSON.parse(responseText);
-                
+
                 if (Array.isArray(aiMatches)) {
                     for (let match of aiMatches) {
                         const item = searchItems.find(i => i._id.toString() === match.id.toString());
@@ -775,7 +775,7 @@ Return EXACTLY valid JSON array. Do not include markdown \`\`\`json.
                 }
             }
         }
-        
+
         matches.sort((a, b) => b.score - a.score);
 
         res.status(201).json({ item: newItem, matches });
@@ -817,11 +817,11 @@ app.patch('/api/notifications/:id/read', requireAuth, async (req, res) => {
     try {
         const notification = await Notification.findById(req.params.id);
         if (!notification) return res.status(404).json({ message: 'Notification not found' });
-        
+
         if (notification.userId.toString() !== req.user.id) {
             return res.status(403).json({ message: 'Unauthorized' });
         }
-        
+
         notification.isRead = true;
         await notification.save();
         res.json({ message: 'Marked as read', notification });

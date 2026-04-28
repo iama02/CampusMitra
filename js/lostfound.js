@@ -43,7 +43,7 @@ function renderLfItems(filter = 'All') {
         const displayDate = item.date || new Date(item.createdAt).toLocaleDateString();
         
         const isOwner = currentUser && currentUser.email === item.reporterEmail;
-        const deleteBtn = isOwner ? `<button onclick="deleteLfItem('${item._id}')" class="ml-2 text-xs text-emerald-600 hover:text-emerald-700 font-bold px-2 py-1 bg-emerald-50 hover:bg-emerald-100 rounded border border-emerald-200 transition-colors flex items-center gap-1"><span>✨</span> Resolved</button>` : '';
+        const deleteBtn = isOwner ? `<button onclick="deleteLfItem('${item._id}')" class="ml-2 text-xs text-red-600 hover:text-red-700 font-bold px-2 py-1 bg-red-50 hover:bg-red-100 rounded border border-red-200 transition-colors flex items-center gap-1"><span>🗑️</span> Delete Post</button>` : '';
         
         const cardHTML = `
             <div class="bg-white rounded-2xl shadow-[0_2px_10px_-4px_rgba(0,0,0,0.1)] border border-gray-100 p-5 flex flex-col hover:-translate-y-1 transition-transform duration-300 relative group">
@@ -194,7 +194,7 @@ window.closeMatchModal = function() {
 }
 
 window.deleteLfItem = function(id) {
-    showConfirm('Are you sure you want to mark this item as resolved? It will be permanently removed from the dashboard.', async () => {
+    showConfirm('Are you sure you want to delete this post? It will be permanently removed from the dashboard.', async () => {
         try {
             const response = await fetch(`/api/lostfound/${id}`, {
                 method: 'DELETE',
@@ -207,7 +207,7 @@ window.deleteLfItem = function(id) {
             
             cachedItems = cachedItems.filter(item => item._id !== id);
             renderLfItems(document.getElementById('lfFilter') ? document.getElementById('lfFilter').value : 'All');
-            showToast("Item marked as resolved! 🎉", "success");
+            showToast("Item permanently deleted! 🗑️", "success");
         } catch (err) {
             showToast(err.message, "error");
         }
@@ -245,12 +245,12 @@ window.showConfirm = function(message, onConfirm) {
     dialog.className = 'bg-white rounded-2xl p-6 shadow-2xl max-w-sm w-full mx-4 transform scale-95 opacity-0 transition-all duration-200 flex flex-col items-center text-center';
     
     dialog.innerHTML = `
-        <div class="w-14 h-14 rounded-full bg-emerald-50 text-success flex items-center justify-center mb-4 text-2xl shadow-inner border border-emerald-100">✨</div>
-        <h3 class="text-xl font-bold text-gray-900 mb-2">Mark as Resolved?</h3>
+        <div class="w-14 h-14 rounded-full bg-red-50 text-red-500 flex items-center justify-center mb-4 text-2xl shadow-inner border border-red-100">🗑️</div>
+        <h3 class="text-xl font-bold text-gray-900 mb-2">Delete Post?</h3>
         <p class="text-sm text-gray-500 mb-6 font-medium">${message}</p>
         <div class="flex gap-3 w-full">
             <button class="flex-1 px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-bold transition-colors shadow-sm" onclick="this.closest('.fixed').remove()">Cancel</button>
-            <button id="confirm-btn-action" class="flex-1 px-4 py-2.5 bg-success hover:bg-emerald-600 text-white rounded-xl font-bold transition-colors shadow-sm">Confirm</button>
+            <button id="confirm-btn-action" class="flex-1 px-4 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-xl font-bold transition-colors shadow-sm">Delete</button>
         </div>
     `;
     
